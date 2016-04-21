@@ -1,0 +1,30 @@
+[submodule "vendor/github.com/tedsuo/ifrit"]
+	path = vendor/github.com/tedsuo/ifrit
+	url = https://github.com/tedsuo/ifrit
+[submodule "vendor/github.com/tedsuo/rata"]
+	path = vendor/github.com/tedsuo/rata
+	url = https://github.com/tedsuo/rata
+[submodule "vendor/github.com/cloudfoundry-incubator/cf-debug-server"]
+	path = vendor/github.com/cloudfoundry-incubator/cf-debug-server
+	url = https://github.com/cloudfoundry-incubator/cf-debug-server
+[submodule "vendor/github.com/cloudfoundry-incubator/cf-lager"]
+	path = vendor/github.com/cloudfoundry-incubator/cf-lager
+	url = https://github.com/cloudfoundry-incubator/cf-lager
+[submodule "vendor/github.com/cloudfoundry-incubator/cf_http"]
+	path = vendor/github.com/cloudfoundry-incubator/cf_http
+	url = https://github.com/cloudfoundry-incubator/cf_http
+[submodule "vendor/github.com/cloudfoundry-incubator/volman"]
+	path = vendor/github.com/cloudfoundry-incubator/volman
+	url = https://github.com/cloudfoundry-incubator/volman
+[submodule "vendor/github.com/onsi/ginkgo"]
+	path = vendor/github.com/onsi/ginkgo
+	url = https://github.com/onsi/ginkgo
+[submodule "vendor/github.com/onsi/gomega"]
+	path = vendor/github.com/onsi/gomega
+	url = https://github.com/onsi/gomega
+[submodule "vendor/github.com/pivotal-golang/clock"]
+	path = vendor/github.com/pivotal-golang/clock
+	url = https://github.com/pivotal-golang/clock
+[submodule "vendor/github.com/pivotal-golang/lager"]
+	path = vendor/github.com/pivotal-golang/lager
+	url = https://github.com/pivotal-golang/lager
