@@ -57,7 +57,7 @@ var _ = Describe("certification/fixture.go", func() {
 			certificationFixture, err = volume_driver_cert.LoadCertificationFixture(tmpFileName)
 			Expect(err).NotTo(HaveOccurred())
 
-			Expect(certificationFixture.VolmanDriverPath).To(Equal("fake-path-to-driver"))
+			Expect(certificationFixture.VolmanDriverPath).To(ContainSubstring("fake-path-to-driver"))
 			Expect(certificationFixture.CreateConfig.Name).To(Equal("fake-request"))
 		})
 	})

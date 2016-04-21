@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os/exec"
+	"os/user"
+	"path/filepath"
 
 	"github.com/cloudfoundry-incubator/volman/voldriver"
 	"github.com/tedsuo/ifrit"
@@ -36,6 +38,19 @@ func LoadCertificationFixture(fileName string) (CertificationFixture, error) {
 
 	certificationFixture := CertificationFixture{}
 	err = json.Unmarshal(bytes, &certificationFixture)
+	if err != nil {
+		return CertificationFixture{}, err
+	}
+
+	// make sure that the plugins path is absolute
+	if certificationFixture.VolmanDriverPath[:2] == "~/" {
+		usr, err := user.Current()
+		if err != nil {
+			return CertificationFixture{}, err
+		}
+		certificationFixture.VolmanDriverPath = filepath.Join(usr.HomeDir, certificationFixture.VolmanDriverPath[2:])
+	}
+	certificationFixture.VolmanDriverPath, err = filepath.Abs(certificationFixture.VolmanDriverPath)
 	if err != nil {
 		return CertificationFixture{}, err
 	}
