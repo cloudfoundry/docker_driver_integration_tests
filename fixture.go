@@ -14,19 +14,15 @@ import (
 )
 
 type CertificationFixture struct {
-	VolmanBinPath     string                  `json:"volman_bin_path"`
 	VolmanDriverPath  string                  `json:"volman_driver_path"`
 	DriverName        string                  `json:"driver_name"`
-	ResetDriverScript string                  `json:"reset_driver_script"`
 	CreateConfig      voldriver.CreateRequest `json:"create_config"`
 }
 
-func NewCertificationFixture(volmanBinPath string, volmanDriverPath string, driverName string, resetDriverScript string, createConfig voldriver.CreateRequest) *CertificationFixture {
+func NewCertificationFixture(volmanDriverPath string, driverName string, createConfig voldriver.CreateRequest) *CertificationFixture {
 	return &CertificationFixture{
-		VolmanBinPath:     volmanBinPath,
 		VolmanDriverPath:  volmanDriverPath,
 		DriverName:        driverName,
-		ResetDriverScript: resetDriverScript,
 		CreateConfig:      createConfig,
 	}
 }
@@ -71,7 +67,6 @@ func (cf *CertificationFixture) CreateVolmanRunner(volmanPath string) ifrit.Runn
 	return ginkgomon.New(ginkgomon.Config{
 		Name: "volman",
 		Command: exec.Command(
-//			cf.VolmanBinPath,
 				volmanPath,
 			"-listenAddr", fmt.Sprintf("0.0.0.0:%d", 8750),
 			"-driversPath", cf.VolmanDriverPath,

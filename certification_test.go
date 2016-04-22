@@ -5,7 +5,6 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
-	"os/exec"
 	"path"
 	"path/filepath"
 
@@ -41,14 +40,6 @@ var _ = Describe("Certify Volman with: ", func() {
 		Expect(err).NotTo(HaveOccurred())
 
 		testLogger = lagertest.NewTestLogger("MainTest")
-
-		driverRunner := ginkgomon.New(ginkgomon.Config{
-			Name:       "fakeDriver",
-			Command:    exec.Command("/bin/bash", certificationFixture.ResetDriverScript),
-			StartCheck: "fakedriverServer.started",
-		})
-
-		ginkgomon.Invoke(driverRunner)
 
 		volmanRunner = certificationFixture.CreateVolmanRunner(volmanPath)
 		volmanProcess = ginkgomon.Invoke(volmanRunner)

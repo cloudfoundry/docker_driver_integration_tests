@@ -39,10 +39,8 @@ var _ = Describe("certification/fixture.go", func() {
 	Context("#LoadCertificationFixture", func() {
 		BeforeEach(func() {
 			certificationFixtureContent := `{
-						"volman_bin_path": "fake-path-to-volman",
  						"volman_driver_path": "fake-path-to-driver",
-  						"driver_name": "fakedriver",
-  						"reset_driver_script": "fake-path",
+  					"driver_name": "fakedriver",
 						"create_config": {
 						    "Name": "fake-request",
 						    "Opts": {"key":"value"}
@@ -65,10 +63,8 @@ var _ = Describe("certification/fixture.go", func() {
 	Context("#SaveCertificationFixture", func() {
 		BeforeEach(func() {
 			certificationFixture = volume_driver_cert.CertificationFixture{
-				VolmanBinPath:     "fake-path-to-volman",
 				VolmanDriverPath:  "fake-path-to-driver",
 				DriverName:        "fakedriver",
-				ResetDriverScript: "fake-path",
 				CreateConfig: voldriver.CreateRequest{
 					Name: "fake-request",
 					Opts: map[string]interface{}{"key": "value"},
