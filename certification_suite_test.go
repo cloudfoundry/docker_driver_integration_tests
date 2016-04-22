@@ -5,31 +5,31 @@ import (
 	. "github.com/onsi/gomega"
 
 	"testing"
+	"github.com/onsi/gomega/gexec"
+	"github.com/onsi/ginkgo/config"
 )
 
-var volmanPath string
+var(
+	volmanPath string
+  err error
+)
 
 func TestCertification(t *testing.T) {
 	RegisterFailHandler(Fail)
 	RunSpecs(t, "Certification Suite")
 }
 
-/*
-var _ = SynchronizedBeforeSuite(func() []byte {
-	volmanPath, err := gexec.Build("github.com/cloudfoundry-incubator/volman/cmd/volman", "-race")
+var _ = SynchronizedBeforeSuite(func()[]byte{
+	Expect(config.GinkgoConfig.ParallelTotal).To(Equal(1),"DRIVER CERTIFICATION TESTS DO NOT RUN IN PARALLEL!!!")
+	// TODO--surely this awful path can't be the only way to get to packages in "vendor?"
+	buildpath, err := gexec.Build("../volume_driver_cert/vendor/github.com/cloudfoundry-incubator/volman/cmd/volman", "-race")
 	Expect(err).NotTo(HaveOccurred())
-	os.Setenv("VOLMAN_PATH", volmanPath)
-	driverPath, err := gexec.Build("github.com/cloudfoundry-incubator/volman/fakedriver/cmd/fakedriver", "-race")
-	Expect(err).NotTo(HaveOccurred())
-	os.Setenv("DRIVER_PATH", driverPath)
-	return []byte(strings.Join([]string{volmanPath, driverPath}, ","))
-}, func(pathsByte []byte) {
+
+	return []byte(buildpath)
+},func(buildpath []byte){
+	volmanPath = string(buildpath)
 })
 
-var _ = AfterSuite(func() {
+var _ = SynchronizedAfterSuite(func(){},func(){
 	gexec.CleanupBuildArtifacts()
-	cmd := exec.Command("/bin/bash", "../scripts/stopdriver.sh")
-	err := cmd.Run()
-	Expect(err).NotTo(HaveOccurred())
 })
-*/

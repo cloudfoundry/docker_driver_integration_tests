@@ -18,7 +18,6 @@ import (
 	"github.com/tedsuo/ifrit/ginkgomon"
 
 	. "github.com/onsi/ginkgo"
-	"github.com/onsi/ginkgo/config"
 	. "github.com/onsi/gomega"
 	. "github.com/onsi/gomega/gexec"
 )
@@ -36,16 +35,12 @@ var _ = Describe("Certify Volman with: ", func() {
 	)
 
 	BeforeEach(func() {
-
 		fileName := os.Getenv("FIXTURE_FILENAME")
+		Expect(fileName).NotTo(Equal(""))
 		certificationFixture, err = volume_driver_cert.LoadCertificationFixture(fileName)
+		Expect(err).NotTo(HaveOccurred())
 
 		testLogger = lagertest.NewTestLogger("MainTest")
-
-		if config.GinkgoConfig.ParallelTotal > 1 {
-			println("DRIVER CERTIFICATION TESTS DO NOT RUN IN PARALLEL!!!")
-		}
-		Expect(config.GinkgoConfig.ParallelTotal).To(Equal(1))
 
 		driverRunner := ginkgomon.New(ginkgomon.Config{
 			Name:       "fakeDriver",
@@ -55,10 +50,11 @@ var _ = Describe("Certify Volman with: ", func() {
 
 		ginkgomon.Invoke(driverRunner)
 
-		volmanRunner = certificationFixture.CreateVolmanRunner()
+		volmanRunner = certificationFixture.CreateVolmanRunner(volmanPath)
 		volmanProcess = ginkgomon.Invoke(volmanRunner)
 
 		client = volhttp.NewRemoteClient(fmt.Sprintf("http://0.0.0.0:%d", serverPort))
+
 	})
 
 	AfterEach(func() {
@@ -72,56 +68,49 @@ var _ = Describe("Certify Volman with: ", func() {
 	})
 
 	Context("after starting volman server", func() {
-		It("should get a 404 for root", func() {
-			_, status, err := get("/", serverPort)
-			Expect(err).NotTo(HaveOccurred())
-			Expect(status).Should(ContainSubstring("404"))
-		})
-
+		var (
+		mountPoint volman.MountResponse
+		err error
+		)
 		It("should return list of drivers", func() {
-
 			drivers, err := client.ListDrivers(testLogger)
 			Expect(err).NotTo(HaveOccurred())
 			Expect(len(drivers.Drivers)).ToNot(Equal(0))
 		})
 
-		It("should mount a volume", func() {
-			mountPoint, err := client.Mount(testLogger, certificationFixture.DriverName, certificationFixture.CreateConfig.Name, certificationFixture.CreateConfig.Opts)
-			Expect(err).NotTo(HaveOccurred())
-			Expect(mountPoint.Path).NotTo(Equal(""))
+		Context("when a valid volume is mounted",func() {
+			BeforeEach(func() {
+				mountPoint, err = client.Mount(testLogger, certificationFixture.DriverName, certificationFixture.CreateConfig.Name, certificationFixture.CreateConfig.Opts)
+				Expect(err).NotTo(HaveOccurred())
+				Expect(mountPoint.Path).NotTo(Equal(""))
+			})
+			AfterEach(func() {
+				err = client.Unmount(testLogger, certificationFixture.DriverName, certificationFixture.CreateConfig.Name)
+				Expect(err).NotTo(HaveOccurred())
+			})
 
-			matches, err := filepath.Glob(mountPoint.Path)
-			Expect(err).NotTo(HaveOccurred())
-			Expect(len(matches)).To(Equal(1))
+			It("should mount a volume", func() {
+				matches, err := filepath.Glob(mountPoint.Path)
+				Expect(err).NotTo(HaveOccurred())
+				Expect(len(matches)).To(Equal(1))
+			})
 
-			err = client.Unmount(testLogger, certificationFixture.DriverName, certificationFixture.CreateConfig.Name)
-			Expect(err).NotTo(HaveOccurred())
+			It("should be possible to write to the mountPoint", func() {
+				testFile := path.Join(mountPoint.Path, "test.txt")
+				err = ioutil.WriteFile(testFile, []byte("hello persi"), 0644)
+				Expect(err).NotTo(HaveOccurred())
+
+				err = os.Remove(testFile)
+				Expect(err).NotTo(HaveOccurred())
+
+				matches, err := filepath.Glob(mountPoint.Path + "/*")
+				Expect(err).NotTo(HaveOccurred())
+				Expect(len(matches)).To(Equal(0))
+			})
 		})
-
-		It("should be possible to write to the mountPoint", func() {
-			mountPoint, err := client.Mount(testLogger, certificationFixture.DriverName, certificationFixture.CreateConfig.Name, certificationFixture.CreateConfig.Opts)
-			Expect(err).NotTo(HaveOccurred())
-			defer client.Unmount(testLogger, certificationFixture.DriverName, certificationFixture.CreateConfig.Name)
-
-			testFile := path.Join(mountPoint.Path, "test.txt")
-			err = ioutil.WriteFile(testFile, []byte("hello persi"), 0644)
-			Expect(err).NotTo(HaveOccurred())
-
-			err = os.Remove(testFile)
-			Expect(err).NotTo(HaveOccurred())
-
-			matches, err := filepath.Glob(mountPoint.Path + "/*")
-			Expect(err).NotTo(HaveOccurred())
-			Expect(len(matches)).To(Equal(0))
-
-			err = client.Unmount(testLogger, certificationFixture.DriverName, certificationFixture.CreateConfig.Name)
-			Expect(err).NotTo(HaveOccurred())
-		})
-
 		It("should unmount a volume given same volume ID", func() {
-			mountPoint, err := client.Mount(testLogger, certificationFixture.DriverName, certificationFixture.CreateConfig.Name, certificationFixture.CreateConfig.Opts)
+			mountPoint, err = client.Mount(testLogger, certificationFixture.DriverName, certificationFixture.CreateConfig.Name, certificationFixture.CreateConfig.Opts)
 			Expect(err).NotTo(HaveOccurred())
-
 			err = client.Unmount(testLogger, certificationFixture.DriverName, certificationFixture.CreateConfig.Name)
 			Expect(err).NotTo(HaveOccurred())
 

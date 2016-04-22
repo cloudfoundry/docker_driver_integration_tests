@@ -67,11 +67,12 @@ func SaveCertificationFixture(fixture CertificationFixture, fileName string) err
 	return ioutil.WriteFile(fileName, bytes, 0666)
 }
 
-func (cf *CertificationFixture) CreateVolmanRunner() ifrit.Runner {
+func (cf *CertificationFixture) CreateVolmanRunner(volmanPath string) ifrit.Runner {
 	return ginkgomon.New(ginkgomon.Config{
 		Name: "volman",
 		Command: exec.Command(
-			cf.VolmanBinPath,
+//			cf.VolmanBinPath,
+				volmanPath,
 			"-listenAddr", fmt.Sprintf("0.0.0.0:%d", 8750),
 			"-driversPath", cf.VolmanDriverPath,
 		),
