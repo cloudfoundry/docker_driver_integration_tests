@@ -12,19 +12,19 @@ go build -o "example/exec/fakedriver" "vendor/github.com/cloudfoundry-incubator/
 # UNIX SOCKET TESTS
 export FIXTURE_FILENAME=example/fixtures/certification_unix.json
 /bin/bash example/scripts/startdriver_unix.sh
-ginkgo -r
+ginkgo
 /bin/bash example/scripts/stopdriver.sh
 
 # TCP TESTS
 export FIXTURE_FILENAME=example/fixtures/certification_tcp.json
 /bin/bash example/scripts/startdriver_tcp.sh
-ginkgo -r
+ginkgo
 /bin/bash example/scripts/stopdriver.sh
 
 # JSON SPEC TESTS
 export FIXTURE_FILENAME=example/fixtures/certification_json.json
 /bin/bash example/scripts/startdriver_json.sh
-ginkgo -r
+ginkgo
 /bin/bash example/scripts/stopdriver.sh
 
 rm example/exec/fakedriver

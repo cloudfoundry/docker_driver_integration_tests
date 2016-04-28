@@ -3,14 +3,19 @@ These tests are used to certify volume drivers against the Diego volume manager 
 # Installation
 
 Prereqs:
-- [go](https://storage.googleapis.com/golang/go1.4.3.darwin-amd64.pkg)
-
+- [go](https://golang.org/dl/)
+- ginkgo and gomega; i.e.
 ```
-git clone git@github.com:cloudfoundry-incubator/volume_driver_cert.git
+go get github.com/onsi/ginkgo/ginkgo
+go get github.com/onsi/gomega
 ```
-or
+To install cert tests in your `GOPATH`:
 ```
 go get git@github.com:cloudfoundry-incubator/volume_driver_cert.git
+```
+or to install cert tests in the current directory:
+```
+git clone git@github.com:cloudfoundry-incubator/volume_driver_cert.git
 ```
 
 # Certification
@@ -31,10 +36,10 @@ go get git@github.com:cloudfoundry-incubator/volume_driver_cert.git
 - Run ginkgo not in parallel mode.  (If you use -p, the tests will fail.)
 
 ```
-ginkgo -r
+ginkgo
 ```
 
-Note: to run tests, you'll need to be in a containing project or gopath (eg. diego_release).
+Note: to run tests, you'll need to be in a containing project or `GOPATH` (eg. diego_release).
 
 ## Examples
 There are sample scripts and fixture files in the [example](example/) folder that run certification tests against the volman test driver.
