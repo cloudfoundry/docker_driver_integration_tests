@@ -28,3 +28,6 @@
 [submodule "vendor/github.com/pivotal-golang/lager"]
 	path = vendor/github.com/pivotal-golang/lager
 	url = https://github.com/pivotal-golang/lager
+[submodule "vendor/github.com/cloudfoundry/gunk"]
+	path = vendor/github.com/cloudfoundry/gunk
+	url = https://github.com/cloudfoundry/gunk
