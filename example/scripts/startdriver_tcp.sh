@@ -9,5 +9,5 @@ rm ~/voldriver_plugins/fakedriver.*
 
 mkdir -p ../mountdir
 
-driversPath=$(realpath ~/voldriver_plugins)
+driversPath=$HOME/voldriver_plugins
 ../exec/fakedriver -listenAddr="0.0.0.0:9776" -transport="tcp" -mountDir="../mountdir" -driversPath="${driversPath}" &

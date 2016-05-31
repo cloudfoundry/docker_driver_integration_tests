@@ -13,7 +13,7 @@ mkdir -p ../mountdir
 
 # temporarily create a sock file in order to find an absolute path for it
 touch ~/voldriver_plugins/fakedriver.sock
-listenAddr=$(realpath ~/voldriver_plugins/fakedriver.sock)
+listenAddr=$HOME/voldriver_plugins/fakedriver.sock
 rm ~/voldriver_plugins/fakedriver.sock
 
 ../exec/fakedriver -listenAddr="${listenAddr}" -transport="unix" -mountDir="../mountdir" &

@@ -69,7 +69,7 @@ func (cf *CertificationFixture) CreateVolmanRunner(volmanPath string) ifrit.Runn
 		Command: exec.Command(
 				volmanPath,
 			"-listenAddr", fmt.Sprintf("0.0.0.0:%d", 8750),
-			"-driversPath", cf.VolmanDriverPath,
+			"-volmanDriverPaths", cf.VolmanDriverPath,
 		),
 		StartCheck: "volman.started",
 	})
