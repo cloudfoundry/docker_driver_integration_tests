@@ -6,7 +6,7 @@ cd ..
 go build -o "example/exec/fakedriver" "vendor/github.com/cloudfoundry-incubator/volman/fakedriver/cmd/fakedriver/main.go"
 
 #=======================================================================================================================
-# fakedriver runs in 3 different modes to test the 3 different transports we support.  This script tests all 3
+# fakedriver runs in 4 different modes to test the 4 different transports we support.  This script tests all 4
 #=======================================================================================================================
 
 # UNIX SOCKET TESTS
@@ -24,6 +24,12 @@ ginkgo
 # JSON SPEC TESTS
 export FIXTURE_FILENAME=example/fixtures/certification_json.json
 /bin/bash example/scripts/startdriver_json.sh
+ginkgo
+/bin/bash example/scripts/stopdriver.sh
+
+# JSON TLS SPEC TESTS
+export FIXTURE_FILENAME=example/fixtures/certification_json.json
+/bin/bash example/scripts/startdriver_json_tls.sh
 ginkgo
 /bin/bash example/scripts/stopdriver.sh
 
