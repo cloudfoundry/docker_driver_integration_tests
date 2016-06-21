@@ -145,10 +145,14 @@ func testFileWrite(mountPoint volman.MountResponse) {
 	err := ioutil.WriteFile(testFile, []byte("hello persi"), 0644)
 	Expect(err).NotTo(HaveOccurred())
 
+	matches, err := filepath.Glob(mountPoint.Path + "/test.txt")
+	Expect(err).NotTo(HaveOccurred())
+	Expect(len(matches)).To(Equal(1))
+
 	err = os.Remove(testFile)
 	Expect(err).NotTo(HaveOccurred())
 
-	matches, err := filepath.Glob(mountPoint.Path + "/*")
+	matches, err = filepath.Glob(mountPoint.Path + "/test.txt")
 	Expect(err).NotTo(HaveOccurred())
 	Expect(len(matches)).To(Equal(0))
 }
