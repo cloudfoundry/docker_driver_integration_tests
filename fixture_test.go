@@ -63,8 +63,8 @@ var _ = Describe("certification/fixture.go", func() {
 	Context("#SaveCertificationFixture", func() {
 		BeforeEach(func() {
 			certificationFixture = volume_driver_cert.CertificationFixture{
-				VolmanDriverPath:  "fake-path-to-driver",
-				DriverName:        "fakedriver",
+				VolmanDriverPath: "fake-path-to-driver",
+				DriverName:       "fakedriver",
 				CreateConfig: voldriver.CreateRequest{
 					Name: "fake-request",
 					Opts: map[string]interface{}{"key": "value"},
