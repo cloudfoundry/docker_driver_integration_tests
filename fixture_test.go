@@ -7,7 +7,7 @@ import (
 
 	"github.com/cloudfoundry-incubator/volume_driver_cert"
 
-	"github.com/cloudfoundry-incubator/volman/voldriver"
+	"github.com/cloudfoundry-incubator/voldriver"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )
