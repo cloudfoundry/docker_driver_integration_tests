@@ -40,12 +40,19 @@ var _ = Describe("certification/fixture.go", func() {
 		BeforeEach(func() {
 			certificationFixtureContent := `{
  						"volman_driver_path": "fake-path-to-driver",
+  					"driver_address": "http://fakedriver_address",
   					"driver_name": "fakedriver",
 						"create_config": {
 						    "Name": "fake-request",
 						    "Opts": {"key":"value"}
- 								 }
-							}`
+ 						},
+						"tls_config": {
+								"InsecureSkipVerify": true,
+								"CAFile": "fakedriver_ca.crt",
+								"CertFile":"fakedriver_client.crt",
+								"KeyFile":"fakedriver_client.key"
+							}
+						}`
 
 			err = ioutil.WriteFile(tmpFileName, []byte(certificationFixtureContent), 0666)
 			Expect(err).NotTo(HaveOccurred())

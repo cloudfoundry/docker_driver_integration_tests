@@ -1,158 +1,161 @@
 package volume_driver_cert_test
 
 import (
-	"fmt"
 	"io/ioutil"
-	"net/http"
 	"os"
 	"path"
 	"path/filepath"
 
-	"github.com/cloudfoundry-incubator/volman"
-	"github.com/cloudfoundry-incubator/volman/volhttp"
-	"github.com/cloudfoundry-incubator/volume_driver_cert"
 	"code.cloudfoundry.org/lager"
 	"code.cloudfoundry.org/lager/lagertest"
-	"github.com/tedsuo/ifrit"
-	"github.com/tedsuo/ifrit/ginkgomon"
 
+	"github.com/cloudfoundry-incubator/volume_driver_cert"
+
+	"github.com/cloudfoundry-incubator/voldriver"
+	"github.com/cloudfoundry-incubator/voldriver/driverhttp"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-	. "github.com/onsi/gomega/gexec"
 )
 
-var _ = Describe("Certify Volman with: ", func() {
+var _ = Describe("Certify with: ", func() {
 	var (
-		testLogger lager.Logger
-		serverPort int = 8750
+		err error
 
-		volmanProcess        ifrit.Process
-		volmanRunner         ifrit.Runner
-		client               volman.Manager
+		testLogger           lager.Logger
 		certificationFixture volume_driver_cert.CertificationFixture
-		err                  error
+		driverClient         voldriver.Driver
+		errResponse          voldriver.ErrorResponse
+
+		mountResponse voldriver.MountResponse
 	)
 
 	BeforeEach(func() {
-		fileName := os.Getenv("FIXTURE_FILENAME")
-		Expect(fileName).NotTo(Equal(""))
-		certificationFixture, err = volume_driver_cert.LoadCertificationFixture(fileName)
-		Expect(err).NotTo(HaveOccurred())
-
 		testLogger = lagertest.NewTestLogger("MainTest")
 
-		volmanRunner = certificationFixture.CreateVolmanRunner(volmanPath)
-		volmanProcess = ginkgomon.Invoke(volmanRunner)
+		fileName := os.Getenv("FIXTURE_FILENAME")
+		Expect(fileName).NotTo(Equal(""))
 
-		client = volhttp.NewRemoteClient(fmt.Sprintf("http://0.0.0.0:%d", serverPort))
+		certificationFixture, err = volume_driver_cert.LoadCertificationFixture(fileName)
+		Expect(err).NotTo(HaveOccurred())
+		testLogger.Info("fixture", lager.Data{"filename": fileName, "context": certificationFixture})
 
+		driverClient, err = driverhttp.NewRemoteClient(certificationFixture.DriverAddress, certificationFixture.TLSConfig)
+		Expect(err).NotTo(HaveOccurred())
 	})
 
-	AfterEach(func() {
-		ginkgomon.Kill(volmanProcess)
-	})
-
-	Context("after starting", func() {
-		It("should not exit", func() {
-			Consistently(volmanRunner).ShouldNot(Exit())
-		})
-	})
-
-	Context("after starting volman server", func() {
-		var (
-			mountPoint volman.MountResponse
-			err        error
-		)
-		It("should return list of drivers", func() {
-			drivers, err := client.ListDrivers(testLogger)
-			Expect(err).NotTo(HaveOccurred())
-			Expect(len(drivers.Drivers)).ToNot(Equal(0))
+	Context("given a created volume", func() {
+		BeforeEach(func() {
+			errResponse = driverClient.Create(testLogger, certificationFixture.CreateConfig)
+			Expect(errResponse.Err).To(Equal(""))
 		})
 
-		Context("when a valid volume is mounted", func() {
+		AfterEach(func() {
+			errResponse = driverClient.Remove(testLogger, voldriver.RemoveRequest{
+				Name: certificationFixture.CreateConfig.Name,
+			})
+			Expect(errResponse.Err).To(Equal(""))
+		})
+
+		Context("given a mounted volume", func() {
 			BeforeEach(func() {
-				mountPoint, err = client.Mount(testLogger, certificationFixture.DriverName, certificationFixture.CreateConfig.Name, certificationFixture.CreateConfig.Opts)
-				Expect(err).NotTo(HaveOccurred())
-				Expect(mountPoint.Path).NotTo(Equal(""))
-			})
-			AfterEach(func() {
-				err = client.Unmount(testLogger, certificationFixture.DriverName, certificationFixture.CreateConfig.Name)
-				Expect(err).NotTo(HaveOccurred())
+				mountResponse = driverClient.Mount(testLogger, voldriver.MountRequest{
+					Name: certificationFixture.CreateConfig.Name,
+				})
+				Expect(mountResponse.Err).To(Equal(""))
+				Expect(mountResponse.Mountpoint).NotTo(Equal(""))
 			})
 
-			It("should mount a volume", func() {
-				matches, err := filepath.Glob(mountPoint.Path)
+			AfterEach(func() {
+				errResponse = driverClient.Unmount(testLogger, voldriver.UnmountRequest{
+					Name: certificationFixture.CreateConfig.Name,
+				})
+				Expect(errResponse.Err).To(Equal(""))
+			})
+
+			It("should mount that volume", func() {
+				matches, err := filepath.Glob(mountResponse.Mountpoint)
 				Expect(err).NotTo(HaveOccurred())
 				Expect(len(matches)).To(Equal(1))
 			})
 
-			It("should be possible to write to the mountPoint", func() {
-				testFileWrite(mountPoint)
+			It("should write to that volume", func() {
+				testFileWrite(testLogger, mountResponse)
 			})
 
-			Context("when the volume is mounted again for another container and then unmounted", func() {
+			Context("when that volume is mounted again (for another container) and then unmounted", func() {
 				BeforeEach(func() {
-					secondMountPoint, err := client.Mount(testLogger, certificationFixture.DriverName, certificationFixture.CreateConfig.Name, certificationFixture.CreateConfig.Opts)
-					Expect(err).NotTo(HaveOccurred())
-					Expect(secondMountPoint.Path).NotTo(Equal(""))
-					err = client.Unmount(testLogger, certificationFixture.DriverName, certificationFixture.CreateConfig.Name)
-					Expect(err).NotTo(HaveOccurred())
+					secondMountResponse := driverClient.Mount(testLogger, voldriver.MountRequest{
+						Name: certificationFixture.CreateConfig.Name,
+					})
+					Expect(secondMountResponse.Err).To(Equal(""))
+					Expect(secondMountResponse.Mountpoint).NotTo(Equal(""))
+
+					errResponse = driverClient.Unmount(testLogger, voldriver.UnmountRequest{
+						Name: certificationFixture.CreateConfig.Name,
+					})
+					Expect(errResponse.Err).To(Equal(""))
 				})
 
-				It("should still be possible to write to the mountPoint", func() {
-					testFileWrite(mountPoint)
+				It("should still write to that volume", func() {
+					testFileWrite(testLogger, mountResponse)
 				})
 			})
 		})
-		It("should unmount a volume given same volume ID", func() {
-			mountPoint, err = client.Mount(testLogger, certificationFixture.DriverName, certificationFixture.CreateConfig.Name, certificationFixture.CreateConfig.Opts)
-			Expect(err).NotTo(HaveOccurred())
-			err = client.Unmount(testLogger, certificationFixture.DriverName, certificationFixture.CreateConfig.Name)
-			Expect(err).NotTo(HaveOccurred())
 
-			matches, err := filepath.Glob(mountPoint.Path)
-			Expect(err).NotTo(HaveOccurred())
-			Expect(len(matches)).To(Equal(0))
+		Context("given an unmounted volume", func() {
+			// the It should unmount a volume given same volume ID test should be here!
 		})
-
-		It("should error, given an invalid driver name", func() {
-			_, err := client.Mount(testLogger, "InvalidDriver", "vol", nil)
-
-			Expect(err).To(HaveOccurred())
-			Expect(err.Error()).To(Equal("Driver 'InvalidDriver' not found in list of known drivers"))
-		})
-
 	})
 
+	It("should unmount a volume given same volume ID", func() {
+		errResponse = driverClient.Create(testLogger, certificationFixture.CreateConfig)
+		Expect(errResponse.Err).To(Equal(""))
+
+		mountResponse := driverClient.Mount(testLogger, voldriver.MountRequest{
+			Name: certificationFixture.CreateConfig.Name,
+		})
+		Expect(mountResponse.Err).To(Equal(""))
+
+		errResponse = driverClient.Unmount(testLogger, voldriver.UnmountRequest{
+			Name: certificationFixture.CreateConfig.Name,
+		})
+		Expect(errResponse.Err).To(Equal(""))
+
+		errResponse = driverClient.Remove(testLogger, voldriver.RemoveRequest{
+			Name: certificationFixture.CreateConfig.Name,
+		})
+		Expect(errResponse.Err).To(Equal(""))
+
+		Expect(cellClean(mountResponse.Mountpoint)).To(Equal(true))
+	})
 })
 
-func get(path string, volmanServerPort int) (body string, status string, err error) {
-	req, err := http.NewRequest("GET", fmt.Sprintf("http://127.0.0.1:%d%s", volmanServerPort, path), nil)
-
-	response, err := (&http.Client{}).Do(req)
-	if err != nil {
-		return "", "", err
-	}
-
-	defer response.Body.Close()
-	bodyBytes, err := ioutil.ReadAll(response.Body)
-	return string(bodyBytes[:]), response.Status, err
-}
-
 // given a mounted mountpoint, tests creation of a file on that mount point
-func testFileWrite(mountPoint volman.MountResponse) {
-	testFile := path.Join(mountPoint.Path, "test.txt")
+func testFileWrite(logger lager.Logger, mountResponse voldriver.MountResponse) {
+	logger = logger.Session("test-file-write")
+	logger.Info("start")
+	defer logger.Info("end")
+
+	logger.Info("writing-test-file", lager.Data{"mountpoint": mountResponse.Mountpoint})
+	testFile := path.Join(mountResponse.Mountpoint, "test.txt")
+	logger.Info("writing-test-file", lager.Data{"filepath": testFile})
 	err := ioutil.WriteFile(testFile, []byte("hello persi"), 0644)
 	Expect(err).NotTo(HaveOccurred())
 
-	matches, err := filepath.Glob(mountPoint.Path + "/test.txt")
+	matches, err := filepath.Glob(mountResponse.Mountpoint + "/test.txt")
 	Expect(err).NotTo(HaveOccurred())
 	Expect(len(matches)).To(Equal(1))
 
 	err = os.Remove(testFile)
 	Expect(err).NotTo(HaveOccurred())
 
-	matches, err = filepath.Glob(mountPoint.Path + "/test.txt")
+	matches, err = filepath.Glob(mountResponse.Mountpoint + "/test.txt")
 	Expect(err).NotTo(HaveOccurred())
 	Expect(len(matches)).To(Equal(0))
+}
+
+func cellClean(mountpoint string) bool {
+	matches, err := filepath.Glob(mountpoint)
+	Expect(err).NotTo(HaveOccurred())
+	return len(matches) == 0
 }

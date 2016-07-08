@@ -26,10 +26,24 @@ git clone git@github.com:cloudfoundry-incubator/volume_driver_cert.git
 ```
 {
   "volman_driver_path": "~/voldriver_plugins",
+  "driver_address": "http://127.0.0.1:9786",
   "driver_name": "fakedriver",
   "create_config": {
     "Name": "fake-volume",
     "Opts": {"volume_id":"fake-volume"}
+  }
+}
+```
+NB: Optionally, you can supply a TLS Config as follows:-
+```
+{
+  "volman_driver_path": "~/voldriver_plugins",
+  ...
+  "tls_config": {
+    "InsecureSkipVerify": true,
+    "CAFile": "localdriver_ca.crt",
+    "CertFile":"localdriver_client.crt",
+    "KeyFile":"localdriver_client.key"
   }
 }
 ```

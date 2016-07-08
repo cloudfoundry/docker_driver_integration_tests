@@ -28,7 +28,7 @@ ginkgo
 /bin/bash example/scripts/stopdriver.sh
 
 # JSON TLS SPEC TESTS
-export FIXTURE_FILENAME=example/fixtures/certification_json.json
+export FIXTURE_FILENAME=example/fixtures/certification_json_tls.json
 /bin/bash example/scripts/startdriver_json_tls.sh
 ginkgo
 /bin/bash example/scripts/stopdriver.sh
