@@ -120,13 +120,13 @@ var _ = Describe("Certify with: ", func() {
 			Name: certificationFixture.CreateConfig.Name,
 		})
 		Expect(errResponse.Err).To(Equal(""))
+		Expect(cellClean(mountResponse.Mountpoint)).To(Equal(true))
 
 		errResponse = driverClient.Remove(testLogger, voldriver.RemoveRequest{
 			Name: certificationFixture.CreateConfig.Name,
 		})
 		Expect(errResponse.Err).To(Equal(""))
 
-		Expect(cellClean(mountResponse.Mountpoint)).To(Equal(true))
 	})
 })
 
