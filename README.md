@@ -11,11 +11,7 @@ go get github.com/onsi/gomega
 ```
 To install cert tests in your `GOPATH`:
 ```
-go get git@github.com:cloudfoundry-incubator/volume_driver_cert.git
-```
-or to install cert tests in the current directory:
-```
-git clone git@github.com:cloudfoundry-incubator/volume_driver_cert.git
+go get -t github.com/cloudfoundry-incubator/volume_driver_cert
 ```
 
 # Certification
@@ -55,6 +51,3 @@ ginkgo
 
 Note: to run tests, you'll need to be in a containing project or `GOPATH` (eg. diego_release).
 
-## Examples
-There are sample scripts and fixture files in the [example](example/) folder that run certification tests against the volman test driver.
-These scripts start and stop the driver and test 3 different communication protocols, but your certification test need not be as complicated.
