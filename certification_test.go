@@ -43,6 +43,14 @@ var _ = Describe("Certify with: ", func() {
 		Expect(err).NotTo(HaveOccurred())
 	})
 
+	Context("given a driver", func(){
+		It("should respond with Capabilities", func() {
+			resp := driverClient.Capabilities(testLogger)
+			Expect(resp.Capabilities).NotTo(BeNil())
+			Expect(resp.Capabilities.Scope).To(Or(Equal("local"), Equal("global")))
+		})
+	})
+
 	Context("given a created volume", func() {
 		BeforeEach(func() {
 			errResponse = driverClient.Create(testLogger, certificationFixture.CreateConfig)
