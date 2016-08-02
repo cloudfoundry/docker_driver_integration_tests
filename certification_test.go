@@ -11,8 +11,8 @@ import (
 
 	"github.com/cloudfoundry-incubator/volume_driver_cert"
 
-	"github.com/cloudfoundry-incubator/voldriver"
-	"github.com/cloudfoundry-incubator/voldriver/driverhttp"
+	"code.cloudfoundry.org/voldriver"
+	"code.cloudfoundry.org/voldriver/driverhttp"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )

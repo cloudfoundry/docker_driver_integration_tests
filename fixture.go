@@ -8,7 +8,7 @@ import (
 	"os/user"
 	"path/filepath"
 
-	"github.com/cloudfoundry-incubator/voldriver"
+	"code.cloudfoundry.org/voldriver"
 	"github.com/tedsuo/ifrit"
 	"github.com/tedsuo/ifrit/ginkgomon"
 )
@@ -18,7 +18,7 @@ type CertificationFixture struct {
 	DriverAddress    string                  `json:"driver_address"`
 	DriverName       string                  `json:"driver_name"`
 	CreateConfig     voldriver.CreateRequest `json:"create_config"`
-	TLSConfig        *voldriver.TLSConfig     `json:"tls_config,omitempty"`
+	TLSConfig        *voldriver.TLSConfig    `json:"tls_config,omitempty"`
 }
 
 func LoadCertificationFixture(fileName string) (CertificationFixture, error) {
