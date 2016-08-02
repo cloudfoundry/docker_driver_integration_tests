@@ -11,7 +11,7 @@ go get github.com/onsi/gomega
 ```
 To install cert tests in your `GOPATH`:
 ```
-go get -t github.com/cloudfoundry-incubator/volume_driver_cert
+go get -t code.cloudfoundry.org/volume_driver_cert
 ```
 
 # Certification

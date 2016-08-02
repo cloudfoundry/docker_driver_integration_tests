@@ -5,7 +5,7 @@ import (
 	"io/ioutil"
 	"os"
 
-	"github.com/cloudfoundry-incubator/volume_driver_cert"
+	"code.cloudfoundry.org/volume_driver_cert"
 
 	"code.cloudfoundry.org/voldriver"
 	. "github.com/onsi/ginkgo"

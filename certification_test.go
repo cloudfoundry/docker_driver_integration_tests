@@ -9,7 +9,7 @@ import (
 	"code.cloudfoundry.org/lager"
 	"code.cloudfoundry.org/lager/lagertest"
 
-	"github.com/cloudfoundry-incubator/volume_driver_cert"
+	"code.cloudfoundry.org/volume_driver_cert"
 
 	"code.cloudfoundry.org/voldriver"
 	"code.cloudfoundry.org/voldriver/driverhttp"
