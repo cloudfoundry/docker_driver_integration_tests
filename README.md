@@ -51,3 +51,22 @@ ginkgo
 
 Note: to run tests, you'll need to be in a containing project or `GOPATH` (eg. diego_release).
 
+# For example
+
+Our support example driver is a [local volume driver](https://github.com/cloudfoundry-incubator/local-volume-release/). We run certifications in our CI to certify it against both Volman and Docker.
+
+The definitions of those tasks are in local-volume-release/scripts. They can be used to create a Concourse pipeline or run the certifications locally. We'll focus on the Volman certifications here.
+
+## Running example
+We used a start/stop script to manage our driver (local-volume-release/scripts/startdriver* and local-volume-release/scripts/stopdriver.sh).
+
+We created stock fixture files (local-volume-release/scripts/fixtures/*) and certs for the encrypted tests (local-volume-release/scripts/certs).
+
+Finally, we encapsulated the running of the various types of the driver (json plain/tls, unix sockets, tcp) in a script (local-volume-release/scripts/run-certification-tests).
+
+To run (with all the prereqs met):
+```
+  local-volume-release/scripts/run-certification-tests
+```
+
+
