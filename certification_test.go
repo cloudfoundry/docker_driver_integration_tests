@@ -13,7 +13,6 @@ import (
 
 	"code.cloudfoundry.org/voldriver"
 	"code.cloudfoundry.org/voldriver/driverhttp"
-	"context"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )
@@ -23,7 +22,6 @@ var _ = Describe("Certify with: ", func() {
 		err error
 
 		testLogger lager.Logger
-		ctx        context.Context
 
 		certificationFixture volume_driver_cert.CertificationFixture
 		driverClient         voldriver.Driver
@@ -34,7 +32,6 @@ var _ = Describe("Certify with: ", func() {
 
 	BeforeEach(func() {
 		testLogger = lagertest.NewTestLogger("MainTest")
-		ctx = context.TODO()
 
 		fileName := os.Getenv("FIXTURE_FILENAME")
 		Expect(fileName).NotTo(Equal(""))
@@ -70,7 +67,7 @@ var _ = Describe("Certify with: ", func() {
 
 		Context("given a mounted volume", func() {
 			BeforeEach(func() {
-				mountResponse = driverClient.Mount(testLogger, ctx, voldriver.MountRequest{
+				mountResponse = driverClient.Mount(testLogger, voldriver.MountRequest{
 					Name: certificationFixture.CreateConfig.Name,
 				})
 				Expect(mountResponse.Err).To(Equal(""))
@@ -96,7 +93,7 @@ var _ = Describe("Certify with: ", func() {
 
 			Context("when that volume is mounted again (for another container) and then unmounted", func() {
 				BeforeEach(func() {
-					secondMountResponse := driverClient.Mount(testLogger, ctx, voldriver.MountRequest{
+					secondMountResponse := driverClient.Mount(testLogger, voldriver.MountRequest{
 						Name: certificationFixture.CreateConfig.Name,
 					})
 					Expect(secondMountResponse.Err).To(Equal(""))
@@ -123,7 +120,7 @@ var _ = Describe("Certify with: ", func() {
 		errResponse = driverClient.Create(testLogger, certificationFixture.CreateConfig)
 		Expect(errResponse.Err).To(Equal(""))
 
-		mountResponse := driverClient.Mount(testLogger, ctx, voldriver.MountRequest{
+		mountResponse := driverClient.Mount(testLogger, voldriver.MountRequest{
 			Name: certificationFixture.CreateConfig.Name,
 		})
 		Expect(mountResponse.Err).To(Equal(""))
