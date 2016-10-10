@@ -15,14 +15,16 @@ import (
 	"code.cloudfoundry.org/voldriver/driverhttp"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+	"context"
 )
 
 var _ = Describe("Certify with: ", func() {
 	var (
 		err error
 
-		testLogger lager.Logger
-
+		testLogger           lager.Logger
+		testContext					 context.Context
+		testEnv voldriver.Env
 		certificationFixture volume_driver_cert.CertificationFixture
 		driverClient         voldriver.Driver
 		errResponse          voldriver.ErrorResponse
@@ -32,6 +34,8 @@ var _ = Describe("Certify with: ", func() {
 
 	BeforeEach(func() {
 		testLogger = lagertest.NewTestLogger("MainTest")
+		testContext = context.TODO()
+		testEnv = driverhttp.NewHttpDriverEnv(&testLogger, &testContext)
 
 		fileName := os.Getenv("FIXTURE_FILENAME")
 		Expect(fileName).NotTo(Equal(""))
@@ -46,7 +50,7 @@ var _ = Describe("Certify with: ", func() {
 
 	Context("given a driver", func() {
 		It("should respond with Capabilities", func() {
-			resp := driverClient.Capabilities(testLogger)
+			resp := driverClient.Capabilities(testEnv)
 			Expect(resp.Capabilities).NotTo(BeNil())
 			Expect(resp.Capabilities.Scope).To(Or(Equal("local"), Equal("global")))
 		})
@@ -54,12 +58,12 @@ var _ = Describe("Certify with: ", func() {
 
 	Context("given a created volume", func() {
 		BeforeEach(func() {
-			errResponse = driverClient.Create(testLogger, certificationFixture.CreateConfig)
+			errResponse = driverClient.Create(testEnv, certificationFixture.CreateConfig)
 			Expect(errResponse.Err).To(Equal(""))
 		})
 
 		AfterEach(func() {
-			errResponse = driverClient.Remove(testLogger, voldriver.RemoveRequest{
+			errResponse = driverClient.Remove(testEnv, voldriver.RemoveRequest{
 				Name: certificationFixture.CreateConfig.Name,
 			})
 			Expect(errResponse.Err).To(Equal(""))
@@ -67,7 +71,7 @@ var _ = Describe("Certify with: ", func() {
 
 		Context("given a mounted volume", func() {
 			BeforeEach(func() {
-				mountResponse = driverClient.Mount(testLogger, voldriver.MountRequest{
+				mountResponse = driverClient.Mount(testEnv, voldriver.MountRequest{
 					Name: certificationFixture.CreateConfig.Name,
 				})
 				Expect(mountResponse.Err).To(Equal(""))
@@ -75,7 +79,7 @@ var _ = Describe("Certify with: ", func() {
 			})
 
 			AfterEach(func() {
-				errResponse = driverClient.Unmount(testLogger, voldriver.UnmountRequest{
+				errResponse = driverClient.Unmount(testEnv, voldriver.UnmountRequest{
 					Name: certificationFixture.CreateConfig.Name,
 				})
 				Expect(errResponse.Err).To(Equal(""))
@@ -93,13 +97,13 @@ var _ = Describe("Certify with: ", func() {
 
 			Context("when that volume is mounted again (for another container) and then unmounted", func() {
 				BeforeEach(func() {
-					secondMountResponse := driverClient.Mount(testLogger, voldriver.MountRequest{
+					secondMountResponse := driverClient.Mount(testEnv, voldriver.MountRequest{
 						Name: certificationFixture.CreateConfig.Name,
 					})
 					Expect(secondMountResponse.Err).To(Equal(""))
 					Expect(secondMountResponse.Mountpoint).NotTo(Equal(""))
 
-					errResponse = driverClient.Unmount(testLogger, voldriver.UnmountRequest{
+					errResponse = driverClient.Unmount(testEnv, voldriver.UnmountRequest{
 						Name: certificationFixture.CreateConfig.Name,
 					})
 					Expect(errResponse.Err).To(Equal(""))
@@ -117,21 +121,21 @@ var _ = Describe("Certify with: ", func() {
 	})
 
 	It("should unmount a volume given same volume ID", func() {
-		errResponse = driverClient.Create(testLogger, certificationFixture.CreateConfig)
+		errResponse = driverClient.Create(testEnv, certificationFixture.CreateConfig)
 		Expect(errResponse.Err).To(Equal(""))
 
-		mountResponse := driverClient.Mount(testLogger, voldriver.MountRequest{
+		mountResponse := driverClient.Mount(testEnv, voldriver.MountRequest{
 			Name: certificationFixture.CreateConfig.Name,
 		})
 		Expect(mountResponse.Err).To(Equal(""))
 
-		errResponse = driverClient.Unmount(testLogger, voldriver.UnmountRequest{
+		errResponse = driverClient.Unmount(testEnv, voldriver.UnmountRequest{
 			Name: certificationFixture.CreateConfig.Name,
 		})
 		Expect(errResponse.Err).To(Equal(""))
 		Expect(cellClean(mountResponse.Mountpoint)).To(Equal(true))
 
-		errResponse = driverClient.Remove(testLogger, voldriver.RemoveRequest{
+		errResponse = driverClient.Remove(testEnv, voldriver.RemoveRequest{
 			Name: certificationFixture.CreateConfig.Name,
 		})
 		Expect(errResponse.Err).To(Equal(""))
