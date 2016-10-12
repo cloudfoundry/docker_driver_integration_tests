@@ -35,7 +35,7 @@ var _ = Describe("Certify with: ", func() {
 	BeforeEach(func() {
 		testLogger = lagertest.NewTestLogger("MainTest")
 		testContext = context.TODO()
-		testEnv = driverhttp.NewHttpDriverEnv(&testLogger, &testContext)
+		testEnv = driverhttp.NewHttpDriverEnv(testLogger, testContext)
 
 		fileName := os.Getenv("FIXTURE_FILENAME")
 		Expect(fileName).NotTo(Equal(""))
