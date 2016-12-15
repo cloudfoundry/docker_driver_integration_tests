@@ -2,6 +2,7 @@ package volume_driver_cert_test
 
 import (
 	"io/ioutil"
+	"math/rand"
 	"os"
 	"path"
 	"path/filepath"
@@ -11,11 +12,12 @@ import (
 
 	"code.cloudfoundry.org/volume_driver_cert"
 
+	"context"
+
 	"code.cloudfoundry.org/voldriver"
 	"code.cloudfoundry.org/voldriver/driverhttp"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-	"context"
 )
 
 var _ = Describe("Certify with: ", func() {
@@ -23,8 +25,8 @@ var _ = Describe("Certify with: ", func() {
 		err error
 
 		testLogger           lager.Logger
-		testContext					 context.Context
-		testEnv voldriver.Env
+		testContext          context.Context
+		testEnv              voldriver.Env
 		certificationFixture volume_driver_cert.CertificationFixture
 		driverClient         voldriver.Driver
 		errResponse          voldriver.ErrorResponse
@@ -149,8 +151,10 @@ func testFileWrite(logger lager.Logger, mountResponse voldriver.MountResponse) {
 	logger.Info("start")
 	defer logger.Info("end")
 
+	fileName := "certtest-" + randomString(10)
+
 	logger.Info("writing-test-file", lager.Data{"mountpoint": mountResponse.Mountpoint})
-	testFile := path.Join(mountResponse.Mountpoint, "test.txt")
+	testFile := path.Join(mountResponse.Mountpoint, fileName)
 	logger.Info("writing-test-file", lager.Data{"filepath": testFile})
 	err := ioutil.WriteFile(testFile, []byte("hello persi"), 0644)
 	Expect(err).NotTo(HaveOccurred())
@@ -162,7 +166,7 @@ func testFileWrite(logger lager.Logger, mountResponse voldriver.MountResponse) {
 	err = os.Remove(testFile)
 	Expect(err).NotTo(HaveOccurred())
 
-	matches, err = filepath.Glob(mountResponse.Mountpoint + "/test.txt")
+	matches, err = filepath.Glob(path.Join(mountResponse.Mountpoint, fileName))
 	Expect(err).NotTo(HaveOccurred())
 	Expect(len(matches)).To(Equal(0))
 }
@@ -171,4 +175,14 @@ func cellClean(mountpoint string) bool {
 	matches, err := filepath.Glob(mountpoint)
 	Expect(err).NotTo(HaveOccurred())
 	return len(matches) == 0
+}
+
+func randomString(n int) string {
+	runes := []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
+
+	b := make([]rune, n)
+	for i := range b {
+		b[i] = runes[rand.Intn(len(runes))]
+	}
+	return string(b)
 }
