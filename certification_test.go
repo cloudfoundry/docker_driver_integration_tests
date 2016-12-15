@@ -159,7 +159,7 @@ func testFileWrite(logger lager.Logger, mountResponse voldriver.MountResponse) {
 	err := ioutil.WriteFile(testFile, []byte("hello persi"), 0644)
 	Expect(err).NotTo(HaveOccurred())
 
-	matches, err := filepath.Glob(mountResponse.Mountpoint + "/test.txt")
+	matches, err := filepath.Glob(mountResponse.Mountpoint + "/" + fileName)
 	Expect(err).NotTo(HaveOccurred())
 	Expect(len(matches)).To(Equal(1))
 
