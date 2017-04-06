@@ -18,6 +18,7 @@ import (
 	"code.cloudfoundry.org/voldriver/driverhttp"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+	"time"
 )
 
 var _ = Describe("Certify with: ", func() {
@@ -177,7 +178,12 @@ func cellClean(mountpoint string) bool {
 	return len(matches) == 0
 }
 
+var isSeeded=false
 func randomString(n int) string {
+	if (!isSeeded) {
+		rand.Seed(time.Now().UnixNano())
+		isSeeded = true
+	}
 	runes := []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
 
 	b := make([]rune, n)
