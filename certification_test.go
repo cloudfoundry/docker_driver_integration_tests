@@ -23,6 +23,7 @@ import (
 	"code.cloudfoundry.org/voldriver/driverhttp"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+	"fmt"
 )
 
 var _ = Describe("Certify with: ", func() {
@@ -134,6 +135,7 @@ var _ = Describe("Certify with: ", func() {
 
 				elapsed := time.Since(startTime)
 				testLogger.Info("file-write-duration", lager.Data{"duration-in-seconds":elapsed.Seconds()})
+				fmt.Printf("File Write Duration: %f\n", elapsed.Seconds())
 
 				// READ ============================
 				wg.Add(len(file_names))
@@ -155,6 +157,7 @@ var _ = Describe("Certify with: ", func() {
 				wg.Wait()
 				elapsed_read := time.Since(startTime_read)
 				testLogger.Info("file-read-duration", lager.Data{"duration-in-seconds":elapsed_read.Seconds()})
+				fmt.Printf("File Read Duration: %f\n", elapsed_read.Seconds())
 
 				// DELETE =====================
 				wg.Add(len(file_names))
@@ -177,6 +180,7 @@ var _ = Describe("Certify with: ", func() {
 				wg.Wait()
 				elapsed_del := time.Since(startTime_delete)
 				testLogger.Info("delete-file-duration", lager.Data{"duration-in-seconds":elapsed_del.Seconds()})
+				fmt.Printf("File Delete Duration: %f\n", elapsed_del.Seconds())
 
 			})
 
