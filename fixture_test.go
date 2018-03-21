@@ -27,6 +27,7 @@ var _ = Describe("certification/fixture.go", func() {
 		Expect(err).NotTo(HaveOccurred())
 
 		tmpFileName = tmpFile.Name()
+		tmpFile.Close()
 
 		certificationFixture = volume_driver_cert.CertificationFixture{}
 	})
