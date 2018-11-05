@@ -1,29 +1,25 @@
 package volume_driver_cert_test
 
 import (
+	"context"
+	"fmt"
+	"hash/crc32"
 	"io/ioutil"
 	"math/rand"
 	"os"
 	"path"
 	"path/filepath"
 	"sync"
-	"hash/crc32"
-
-
-	"code.cloudfoundry.org/lager"
-	"code.cloudfoundry.org/lager/lagertest"
-
-	"code.cloudfoundry.org/volume_driver_cert"
-
-	"context"
-
 	"time"
 
-	"code.cloudfoundry.org/voldriver"
-	"code.cloudfoundry.org/voldriver/driverhttp"
+	"code.cloudfoundry.org/dockerdriver"
+	"code.cloudfoundry.org/dockerdriver/driverhttp"
+	"code.cloudfoundry.org/lager"
+	"code.cloudfoundry.org/lager/lagertest"
+	"code.cloudfoundry.org/volume_driver_cert"
+
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-	"fmt"
 )
 
 var _ = Describe("Certify with: ", func() {
@@ -32,12 +28,12 @@ var _ = Describe("Certify with: ", func() {
 
 		testLogger           lager.Logger
 		testContext          context.Context
-		testEnv              voldriver.Env
+		testEnv              dockerdriver.Env
 		certificationFixture volume_driver_cert.CertificationFixture
-		driverClient         voldriver.Driver
-		errResponse          voldriver.ErrorResponse
+		driverClient         dockerdriver.Driver
+		errResponse          dockerdriver.ErrorResponse
 
-		mountResponse voldriver.MountResponse
+		mountResponse dockerdriver.MountResponse
 	)
 
 	BeforeEach(func() {
@@ -71,7 +67,7 @@ var _ = Describe("Certify with: ", func() {
 		})
 
 		AfterEach(func() {
-			errResponse = driverClient.Remove(testEnv, voldriver.RemoveRequest{
+			errResponse = driverClient.Remove(testEnv, dockerdriver.RemoveRequest{
 				Name: certificationFixture.CreateConfig.Name,
 			})
 			Expect(errResponse.Err).To(Equal(""))
@@ -79,7 +75,7 @@ var _ = Describe("Certify with: ", func() {
 
 		Context("given a mounted volume", func() {
 			BeforeEach(func() {
-				mountResponse = driverClient.Mount(testEnv, voldriver.MountRequest{
+				mountResponse = driverClient.Mount(testEnv, dockerdriver.MountRequest{
 					Name: certificationFixture.CreateConfig.Name,
 				})
 				Expect(mountResponse.Err).To(Equal(""))
@@ -87,7 +83,7 @@ var _ = Describe("Certify with: ", func() {
 			})
 
 			AfterEach(func() {
-				errResponse = driverClient.Unmount(testEnv, voldriver.UnmountRequest{
+				errResponse = driverClient.Unmount(testEnv, dockerdriver.UnmountRequest{
 					Name: certificationFixture.CreateConfig.Name,
 				})
 				Expect(errResponse.Err).To(Equal(""))
@@ -134,7 +130,7 @@ var _ = Describe("Certify with: ", func() {
 				wg.Wait()
 
 				elapsed := time.Since(startTime)
-				testLogger.Info("file-write-duration", lager.Data{"duration-in-seconds":elapsed.Seconds()})
+				testLogger.Info("file-write-duration", lager.Data{"duration-in-seconds": elapsed.Seconds()})
 				fmt.Printf("File Write Duration: %f\n", elapsed.Seconds())
 
 				// READ ============================
@@ -146,7 +142,7 @@ var _ = Describe("Certify with: ", func() {
 
 						testLogger.Debug("reading-test-file", lager.Data{"mountpoint": mountResponse.Mountpoint})
 						testFile := path.Join(mountResponse.Mountpoint, key)
-						testLogger.Debug("reading-test-file", lager.Data{"filepath": testFile, "checksum":val})
+						testLogger.Debug("reading-test-file", lager.Data{"filepath": testFile, "checksum": val})
 						contents, err := ioutil.ReadFile(testFile)
 						Expect(err).NotTo(HaveOccurred())
 						check := crc32.Checksum(contents, crc32.IEEETable)
@@ -156,7 +152,7 @@ var _ = Describe("Certify with: ", func() {
 
 				wg.Wait()
 				elapsed_read := time.Since(startTime_read)
-				testLogger.Info("file-read-duration", lager.Data{"duration-in-seconds":elapsed_read.Seconds()})
+				testLogger.Info("file-read-duration", lager.Data{"duration-in-seconds": elapsed_read.Seconds()})
 				fmt.Printf("File Read Duration: %f\n", elapsed_read.Seconds())
 
 				// DELETE =====================
@@ -170,7 +166,9 @@ var _ = Describe("Certify with: ", func() {
 						testFile := path.Join(mountResponse.Mountpoint, key)
 						testLogger.Debug("deleting-test-file", lager.Data{"filepath": testFile})
 						err := os.Remove(testFile)
-						if err != nil {testLogger.Error("error-deleting-file", err)}
+						if err != nil {
+							testLogger.Error("error-deleting-file", err)
+						}
 						Expect(err).NotTo(HaveOccurred())
 						matches, _ := filepath.Glob(mountResponse.Mountpoint + "/" + key)
 						Expect(len(matches)).To(Equal(0))
@@ -179,20 +177,20 @@ var _ = Describe("Certify with: ", func() {
 
 				wg.Wait()
 				elapsed_del := time.Since(startTime_delete)
-				testLogger.Info("delete-file-duration", lager.Data{"duration-in-seconds":elapsed_del.Seconds()})
+				testLogger.Info("delete-file-duration", lager.Data{"duration-in-seconds": elapsed_del.Seconds()})
 				fmt.Printf("File Delete Duration: %f\n", elapsed_del.Seconds())
 
 			})
 
 			Context("when that volume is mounted again (for another container) and then unmounted", func() {
 				BeforeEach(func() {
-					secondMountResponse := driverClient.Mount(testEnv, voldriver.MountRequest{
+					secondMountResponse := driverClient.Mount(testEnv, dockerdriver.MountRequest{
 						Name: certificationFixture.CreateConfig.Name,
 					})
 					Expect(secondMountResponse.Err).To(Equal(""))
 					Expect(secondMountResponse.Mountpoint).NotTo(Equal(""))
 
-					errResponse = driverClient.Unmount(testEnv, voldriver.UnmountRequest{
+					errResponse = driverClient.Unmount(testEnv, dockerdriver.UnmountRequest{
 						Name: certificationFixture.CreateConfig.Name,
 					})
 					Expect(errResponse.Err).To(Equal(""))
@@ -213,18 +211,18 @@ var _ = Describe("Certify with: ", func() {
 		errResponse = driverClient.Create(testEnv, certificationFixture.CreateConfig)
 		Expect(errResponse.Err).To(Equal(""))
 
-		mountResponse := driverClient.Mount(testEnv, voldriver.MountRequest{
+		mountResponse := driverClient.Mount(testEnv, dockerdriver.MountRequest{
 			Name: certificationFixture.CreateConfig.Name,
 		})
 		Expect(mountResponse.Err).To(Equal(""))
 
-		errResponse = driverClient.Unmount(testEnv, voldriver.UnmountRequest{
+		errResponse = driverClient.Unmount(testEnv, dockerdriver.UnmountRequest{
 			Name: certificationFixture.CreateConfig.Name,
 		})
 		Expect(errResponse.Err).To(Equal(""))
 		Expect(cellClean(mountResponse.Mountpoint)).To(Equal(true))
 
-		errResponse = driverClient.Remove(testEnv, voldriver.RemoveRequest{
+		errResponse = driverClient.Remove(testEnv, dockerdriver.RemoveRequest{
 			Name: certificationFixture.CreateConfig.Name,
 		})
 		Expect(errResponse.Err).To(Equal(""))
@@ -233,7 +231,7 @@ var _ = Describe("Certify with: ", func() {
 })
 
 // given a mounted mountpoint, tests creation of a file on that mount point
-func testFileWrite(logger lager.Logger, mountResponse voldriver.MountResponse) {
+func testFileWrite(logger lager.Logger, mountResponse dockerdriver.MountResponse) {
 	logger = logger.Session("test-file-write")
 	logger.Info("start")
 	defer logger.Info("end")

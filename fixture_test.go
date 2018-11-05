@@ -5,9 +5,9 @@ import (
 	"io/ioutil"
 	"os"
 
+	"code.cloudfoundry.org/dockerdriver"
 	"code.cloudfoundry.org/volume_driver_cert"
 
-	"code.cloudfoundry.org/voldriver"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )
@@ -73,7 +73,7 @@ var _ = Describe("certification/fixture.go", func() {
 			certificationFixture = volume_driver_cert.CertificationFixture{
 				VolmanDriverPath: "fake-path-to-driver",
 				DriverName:       "fakedriver",
-				CreateConfig: voldriver.CreateRequest{
+				CreateConfig: dockerdriver.CreateRequest{
 					Name: "fake-request",
 					Opts: map[string]interface{}{"key": "value"},
 				},
