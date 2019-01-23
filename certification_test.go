@@ -9,6 +9,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"strconv"
 	"sync"
 	"time"
 
@@ -102,7 +103,18 @@ var _ = Describe("Certify with: ", func() {
 			It("should be be able to write and read many files", func() {
 				var wg sync.WaitGroup
 
-				numFiles := 100
+				cnt := os.Getenv("NUM_FILES")
+				if cnt == "" {
+					cnt = "0"
+				}
+
+				numFiles, err := strconv.Atoi(cnt)
+				Expect(err).NotTo(HaveOccurred())
+
+				if numFiles == 0 {
+					numFiles = 100
+				}
+
 				mu := sync.Mutex{}
 				wg.Add(numFiles)
 				startTime := time.Now()
