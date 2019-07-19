@@ -6,7 +6,7 @@ import (
 	"os"
 
 	"code.cloudfoundry.org/dockerdriver"
-	"code.cloudfoundry.org/docker-driver-integration-tests"
+	"code.cloudfoundry.org/docker_driver_integration_tests"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
