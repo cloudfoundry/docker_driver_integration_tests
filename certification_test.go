@@ -95,29 +95,6 @@ var _ = Describe("Certify with: ", func() {
 			It("should write to that volume", func() {
 				testFileWrite(testLogger, mountResponse)
 			})
-
-			Context("when that volume is mounted again (for another container) and then unmounted", func() {
-				BeforeEach(func() {
-					secondMountResponse := driverClient.Mount(testEnv, dockerdriver.MountRequest{
-						Name: certificationFixture.CreateConfig.Name,
-					})
-					Expect(secondMountResponse.Err).To(Equal(""))
-					Expect(secondMountResponse.Mountpoint).NotTo(Equal(""))
-
-					errResponse = driverClient.Unmount(testEnv, dockerdriver.UnmountRequest{
-						Name: certificationFixture.CreateConfig.Name,
-					})
-					Expect(errResponse.Err).To(Equal(""))
-				})
-
-				It("should still write to that volume", func() {
-					testFileWrite(testLogger, mountResponse)
-				})
-			})
-		})
-
-		Context("given an unmounted volume", func() {
-			// the It should unmount a volume given same volume ID test should be here!
 		})
 	})
 
