@@ -1,4 +1,4 @@
-package volume_driver_cert_test
+package docker_driver_integration_tests_test
 
 import (
 	. "github.com/onsi/ginkgo"

@@ -1,4 +1,4 @@
-package volume_driver_cert_test
+package docker_driver_integration_tests_test
 
 import (
 	"context"
@@ -13,7 +13,7 @@ import (
 	"code.cloudfoundry.org/dockerdriver/driverhttp"
 	"code.cloudfoundry.org/lager"
 	"code.cloudfoundry.org/lager/lagertest"
-	"code.cloudfoundry.org/volume_driver_cert"
+	"code.cloudfoundry.org/docker-driver-integration-tests"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -26,7 +26,7 @@ var _ = Describe("Certify with: ", func() {
 		testLogger           lager.Logger
 		testContext          context.Context
 		testEnv              dockerdriver.Env
-		certificationFixture volume_driver_cert.CertificationFixture
+		certificationFixture docker_driver_integration_tests.CertificationFixture
 		driverClient         dockerdriver.Driver
 		errResponse          dockerdriver.ErrorResponse
 
@@ -41,7 +41,7 @@ var _ = Describe("Certify with: ", func() {
 		fileName := os.Getenv("FIXTURE_FILENAME")
 		Expect(fileName).NotTo(Equal(""))
 
-		certificationFixture, err = volume_driver_cert.LoadCertificationFixture(fileName)
+		certificationFixture, err = docker_driver_integration_tests.LoadCertificationFixture(fileName)
 		Expect(err).NotTo(HaveOccurred())
 		testLogger.Info("fixture", lager.Data{"filename": fileName, "context": certificationFixture})
 

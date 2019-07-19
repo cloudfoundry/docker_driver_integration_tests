@@ -1,4 +1,4 @@
-package volume_driver_cert_test
+package docker_driver_integration_tests_test
 
 import (
 	"encoding/json"
@@ -6,7 +6,7 @@ import (
 	"os"
 
 	"code.cloudfoundry.org/dockerdriver"
-	"code.cloudfoundry.org/volume_driver_cert"
+	"code.cloudfoundry.org/docker-driver-integration-tests"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -16,7 +16,7 @@ var _ = Describe("certification/fixture.go", func() {
 	var (
 		err                  error
 		tmpDir, tmpFileName  string
-		certificationFixture volume_driver_cert.CertificationFixture
+		certificationFixture docker_driver_integration_tests.CertificationFixture
 	)
 
 	BeforeEach(func() {
@@ -29,7 +29,7 @@ var _ = Describe("certification/fixture.go", func() {
 		tmpFileName = tmpFile.Name()
 		tmpFile.Close()
 
-		certificationFixture = volume_driver_cert.CertificationFixture{}
+		certificationFixture = docker_driver_integration_tests.CertificationFixture{}
 	})
 
 	AfterEach(func() {
@@ -60,7 +60,7 @@ var _ = Describe("certification/fixture.go", func() {
 		})
 
 		It("loads the fake certification fixture", func() {
-			certificationFixture, err = volume_driver_cert.LoadCertificationFixture(tmpFileName)
+			certificationFixture, err = docker_driver_integration_tests.LoadCertificationFixture(tmpFileName)
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(certificationFixture.VolmanDriverPath).To(ContainSubstring("fake-path-to-driver"))
@@ -70,7 +70,7 @@ var _ = Describe("certification/fixture.go", func() {
 
 	Context("#SaveCertificationFixture", func() {
 		BeforeEach(func() {
-			certificationFixture = volume_driver_cert.CertificationFixture{
+			certificationFixture = docker_driver_integration_tests.CertificationFixture{
 				VolmanDriverPath: "fake-path-to-driver",
 				DriverName:       "fakedriver",
 				CreateConfig: dockerdriver.CreateRequest{
@@ -81,13 +81,13 @@ var _ = Describe("certification/fixture.go", func() {
 		})
 
 		It("saves the fake certification fixture", func() {
-			err = volume_driver_cert.SaveCertificationFixture(certificationFixture, tmpFileName)
+			err = docker_driver_integration_tests.SaveCertificationFixture(certificationFixture, tmpFileName)
 			Expect(err).NotTo(HaveOccurred())
 
 			bytes, err := ioutil.ReadFile(tmpFileName)
 			Expect(err).ToNot(HaveOccurred())
 
-			readFixture := volume_driver_cert.CertificationFixture{}
+			readFixture := docker_driver_integration_tests.CertificationFixture{}
 			json.Unmarshal(bytes, &readFixture)
 
 			Expect(readFixture.VolmanDriverPath).To(Equal("fake-path-to-driver"))

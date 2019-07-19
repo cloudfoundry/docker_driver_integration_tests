@@ -1,4 +1,4 @@
-package volume_driver_cert
+package docker_driver_integration_tests
 
 import (
 	"encoding/json"
