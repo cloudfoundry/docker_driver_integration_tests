@@ -2,15 +2,11 @@ package volume_driver_cert_test
 
 import (
 	"context"
-	"fmt"
-	"hash/crc32"
 	"io/ioutil"
 	"math/rand"
 	"os"
 	"path"
 	"path/filepath"
-	"strconv"
-	"sync"
 	"time"
 
 	"code.cloudfoundry.org/dockerdriver"
@@ -98,100 +94,6 @@ var _ = Describe("Certify with: ", func() {
 
 			It("should write to that volume", func() {
 				testFileWrite(testLogger, mountResponse)
-			})
-
-			It("should be be able to write and read many files", func() {
-				var wg sync.WaitGroup
-
-				cnt := os.Getenv("NUM_FILES")
-				if cnt == "" {
-					cnt = "0"
-				}
-
-				numFiles, err := strconv.Atoi(cnt)
-				Expect(err).NotTo(HaveOccurred())
-
-				if numFiles == 0 {
-					numFiles = 100
-				}
-
-				mu := sync.Mutex{}
-				wg.Add(numFiles)
-				startTime := time.Now()
-				file_names := make(map[string]uint32)
-				for i := 0; i < numFiles; i++ {
-					go func() {
-						defer wg.Done()
-						fileName := "certtest-" + randomString(10)
-						contents := "contents-" + randomString(1000000)
-						mu.Lock()
-						check := crc32.Checksum([]byte(contents), crc32.IEEETable)
-						file_names[fileName] = check
-						mu.Unlock()
-						testLogger.Debug("writing-test-file", lager.Data{"mountpoint": mountResponse.Mountpoint})
-						testFile := path.Join(mountResponse.Mountpoint, fileName)
-						testLogger.Debug("writing-test-file", lager.Data{"filepath": testFile})
-						err := ioutil.WriteFile(testFile, []byte(contents), 0644)
-						Expect(err).NotTo(HaveOccurred())
-
-						matches, err := filepath.Glob(mountResponse.Mountpoint + "/" + fileName)
-						Expect(err).NotTo(HaveOccurred())
-						Expect(len(matches)).To(Equal(1))
-					}()
-				}
-				wg.Wait()
-
-				elapsed := time.Since(startTime)
-				testLogger.Info("file-write-duration", lager.Data{"duration-in-seconds": elapsed.Seconds()})
-				fmt.Printf("File Write Duration: %f\n", elapsed.Seconds())
-
-				// READ ============================
-				wg.Add(len(file_names))
-				startTime_read := time.Now()
-				for key, val := range file_names {
-					go func(key string, val uint32) {
-						defer wg.Done()
-
-						testLogger.Debug("reading-test-file", lager.Data{"mountpoint": mountResponse.Mountpoint})
-						testFile := path.Join(mountResponse.Mountpoint, key)
-						testLogger.Debug("reading-test-file", lager.Data{"filepath": testFile, "checksum": val})
-						contents, err := ioutil.ReadFile(testFile)
-						Expect(err).NotTo(HaveOccurred())
-						check := crc32.Checksum(contents, crc32.IEEETable)
-						Expect(check).To(Equal(val))
-					}(key, val)
-				}
-
-				wg.Wait()
-				elapsed_read := time.Since(startTime_read)
-				testLogger.Info("file-read-duration", lager.Data{"duration-in-seconds": elapsed_read.Seconds()})
-				fmt.Printf("File Read Duration: %f\n", elapsed_read.Seconds())
-
-				// DELETE =====================
-				wg.Add(len(file_names))
-				startTime_delete := time.Now()
-				for key := range file_names {
-					go func(key string) {
-						defer wg.Done()
-
-						testLogger.Debug("deleting-test-file", lager.Data{"mountpoint": mountResponse.Mountpoint})
-						testFile := path.Join(mountResponse.Mountpoint, key)
-						testLogger.Debug("deleting-test-file", lager.Data{"filepath": testFile})
-						err := os.Remove(testFile)
-						if err != nil {
-							testLogger.Error("error-deleting-file", err)
-						}
-						Expect(err).NotTo(HaveOccurred())
-						matches, _ := filepath.Glob(mountResponse.Mountpoint + "/" + key)
-						Expect(len(matches)).To(Equal(0))
-					}(key)
-				}
-
-				wg.Wait()
-				elapsed_del := time.Since(startTime_delete)
-				testLogger.Info("delete-file-duration", lager.Data{"duration-in-seconds": elapsed_del.Seconds()})
-				fmt.Printf("File Delete Duration: %f\n", elapsed_del.Seconds())
-
 			})
 
 			Context("when that volume is mounted again (for another container) and then unmounted", func() {
