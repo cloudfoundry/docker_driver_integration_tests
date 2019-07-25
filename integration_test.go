@@ -139,6 +139,10 @@ func testFileWrite(logger lager.Logger, mountResponse dockerdriver.MountResponse
 	Expect(err).NotTo(HaveOccurred())
 	Expect(len(matches)).To(Equal(1))
 
+	bytes, err := ioutil.ReadFile(mountResponse.Mountpoint + "/" + fileName)
+	Expect(err).NotTo(HaveOccurred())
+	Expect(bytes).To(Equal([]byte("hello persi")))
+
 	err = os.Remove(testFile)
 	Expect(err).NotTo(HaveOccurred())
 
