@@ -1,0 +1,6 @@
+[
+    {"credentials":{},"volume_mounts":[{"driver":"smbdriver","container_dir":"/var/vcap/data/12345","mode":"rw","device_type":"shared","device":{"volume_id":"12345-edd10d0631b620fc200de5173a5bdfad","mount_config":{"domain":null,"password":"b","source":"foo/bar","username":"a"}}}]},
+    {"credentials":{},"volume_mounts":[{"driver":"smbdriver","container_dir":"/foo/bar","mode":"rw","device_type":"shared","device":{"volume_id":"12345-3-edd10d0631b620fc200de5173a5bdfad","mount_config":{"domain":null,"password":"b","source":"foo/bar","username":"a"}}}]},
+
+    {"credentials":{},"volume_mounts":[{"driver":"smbdriver","container_dir":"/var/vcap/data/12345","mode":"rw","device_type":"shared","device":{"volume_id":"12345-8f8cb1ad0563f024c55204504584587e","mount_config":{"domain":null,"password":"b","source":"/foo/bar","username":"a"}}}]}
+]
