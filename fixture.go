@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"os"
 	"os/exec"
 	"os/user"
 	"path/filepath"
@@ -19,6 +20,20 @@ type CertificationFixture struct {
 	DriverName       string                     `json:"driver_name"`
 	CreateConfig     dockerdriver.CreateRequest `json:"create_config"`
 	TLSConfig        *dockerdriver.TLSConfig    `json:"tls_config,omitempty"`
+}
+
+func LoadFixtureTemplate() CertificationFixture {
+	fileName, avail := os.LookupEnv("FIXTURE_FILENAME")
+	if !avail {
+		panic("FIXTURE_FILENAME not set")
+	}
+
+	fixture, err := LoadCertificationFixture(fileName)
+	if err != nil {
+		panic(fmt.Sprintf("Failed to load fixture %s", fileName))
+	}
+
+	return fixture
 }
 
 func LoadCertificationFixture(fileName string) (CertificationFixture, error) {
