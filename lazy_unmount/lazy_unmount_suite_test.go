@@ -24,5 +24,5 @@ var _ = BeforeSuite(func() {
 	var err error
 	session, err = gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
 	Expect(err).NotTo(HaveOccurred())
-	Eventually(session.Out).Should(gbytes.Say("driver-server.server.start"))
+	Eventually(session.Out).Should(gbytes.Say("driver-server.started"))
 })
