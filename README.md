@@ -57,3 +57,29 @@ fly -t persi execute \
 -i smb-volume-release=/Users/pivotal/workspace/smb-volume-release \
  --privileged
 ```
+
+
+## Running example NFS
+```
+fly -t persi execute \
+-c /Users/pivotal/workspace/nfs-volume-release/scripts/ci/run_docker_driver_integration_tests.build.yml \
+-j persi/nfsdriver-integration \
+-i nfs-volume-release-concourse-tasks=/Users/pivotal/workspace/nfs-volume-release \
+-i docker_driver_integration_tests=/Users/pivotal/go/src/code.cloudfoundry.org/docker_driver_integration_tests \
+-i nfs-volume-release=/Users/pivotal/workspace/nfs-volume-release \
+-i mapfs-release=/Users/pivotal/workspace/mapfs-release \
+ --privileged
+```
+
+
+## Running example NFS lazy unmount
+```
+fly -t persi execute \
+-c /Users/pivotal/workspace/nfs-volume-release/scripts/ci/run_docker_driver_lazy_unmount_integration_tests.build.yml \
+-j persi/nfsdriver-integration \
+-i nfs-volume-release-concourse-tasks=/Users/pivotal/workspace/nfs-volume-release \
+-i docker_driver_integration_tests=/Users/pivotal/go/src/code.cloudfoundry.org/docker_driver_integration_tests \
+-i nfs-volume-release=/Users/pivotal/workspace/nfs-volume-release \
+-i mapfs-release=/Users/pivotal/workspace/mapfs-release \
+ --privileged
+```
