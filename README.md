@@ -1,4 +1,4 @@
-# Diego Volume Driver Certification Tests
+# Diego Volume Driver Integration Tests
 These tests are used to certify volume drivers against the Diego volume manager (aka *volman*).
 # Installation
 
@@ -11,7 +11,7 @@ go get github.com/onsi/gomega
 ```
 To install cert tests in your `GOPATH`:
 ```
-go get -t code.cloudfoundry.org/volume_driver_cert
+go get -t code.cloudfoundry.org/docker_driver_integration_tests
 ```
 
 # Certification
