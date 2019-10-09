@@ -9,11 +9,11 @@ import (
 	"path/filepath"
 	"time"
 
+	"code.cloudfoundry.org/docker_driver_integration_tests"
 	"code.cloudfoundry.org/dockerdriver"
 	"code.cloudfoundry.org/dockerdriver/driverhttp"
 	"code.cloudfoundry.org/lager"
 	"code.cloudfoundry.org/lager/lagertest"
-	"code.cloudfoundry.org/docker_driver_integration_tests"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -94,6 +94,17 @@ var _ = Describe("Certify with: ", func() {
 
 			It("should write to that volume", func() {
 				testFileWrite(testLogger, mountResponse)
+			})
+
+			It("should not log any sensitive data", func() {
+				createConfig := certificationFixture.CreateConfig
+				if val, found := createConfig.Opts["password"]; found {
+					driverOutput := string(session.Out.Contents())
+					Expect(driverOutput).Should(ContainSubstring("REDACTED"))
+					Expect(driverOutput).ShouldNot(ContainSubstring(val.(string)))
+				} else {
+					Skip("No password found in create config")
+				}
 			})
 		})
 	})
