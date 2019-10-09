@@ -53,5 +53,5 @@ Note: to run tests, you'll need to be in a containing project or `GOPATH` (eg. d
 
 ## Running example
 ```
-SMB_REMOTE_PATH=//localhost/example1 SMB_USERNAME=example1 SMB_PASSWORD=badpass TEST_PACKAGE=docker_driver_integration_tests/compatibility fly -t persi execute -c /Users/pivotal/workspace/smb-volume-release/scripts/ci/run_docker_driver_integration_tests.build.yml -j persi/smbdriver-integration -i smb-volume-release-concourse-tasks=/Users/pivotal/workspace/smb-volume-release -i docker_driver_integration_tests=$PWD -i smb-volume-release=/Users/pivotal/workspace/smb-volume-release --privileged
+SMB_REMOTE_PATH=//localhost/example1 SMB_USERNAME=example1 SMB_PASSWORD=badpass TEST_PACKAGE=docker_driver_integration_tests/compatibility fly -t persi execute -c /Users/pivotal/workspace/smb-volume-release/scripts/ci/run_docker_driver_integration_tests.build.yml -j persi/smbdriver-integration -i smb-volume-release-concourse-tasks=/Users/pivotal/workspace/smb-volume-release -i docker_driver_integration_tests=/Users/pivotal/go/src/code.cloudfoundry.org/docker_driver_integration_tests -i smb-volume-release=/Users/pivotal/workspace/smb-volume-release --privileged
 ```
