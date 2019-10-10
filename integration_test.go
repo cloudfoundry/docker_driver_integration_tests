@@ -57,6 +57,42 @@ var _ = Describe("Certify with: ", func() {
 		})
 	})
 
+	Context("given a created volume missing required options", func() {
+		BeforeEach(func() {
+			certificationFixture.CreateConfig.Name = "invalid-configuration"
+			if _, found := certificationFixture.CreateConfig.Opts["password"]; !found {
+				Skip("No password found in create config")
+			}
+
+			delete(certificationFixture.CreateConfig.Opts, "username")
+			delete(certificationFixture.CreateConfig.Opts, "password")
+
+			errResponse = driverClient.Create(testEnv, certificationFixture.CreateConfig)
+			Expect(errResponse.Err).To(Equal(""))
+
+		})
+
+		AfterEach(func() {
+			errResponse = driverClient.Unmount(testEnv, dockerdriver.UnmountRequest{
+				Name: certificationFixture.CreateConfig.Name,
+			})
+			Expect(errResponse.Err).To(ContainSubstring("Volume invalid-configuration does not exist"))
+
+			errResponse = driverClient.Remove(testEnv, dockerdriver.RemoveRequest{
+				Name: certificationFixture.CreateConfig.Name,
+			})
+			Expect(errResponse.Err).To(ContainSubstring("Volume invalid-configuration does not exist"))
+		})
+
+		It("should log an error message", func() {
+			mountResponse = driverClient.Mount(testEnv, dockerdriver.MountRequest{
+				Name: certificationFixture.CreateConfig.Name,
+			})
+
+			Expect(mountResponse.Err).To(ContainSubstring("Missing mandatory options: username, password"))
+		})
+	})
+
 	Context("given a created volume", func() {
 		BeforeEach(func() {
 			errResponse = driverClient.Create(testEnv, certificationFixture.CreateConfig)
