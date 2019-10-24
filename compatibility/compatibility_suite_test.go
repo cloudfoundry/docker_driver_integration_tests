@@ -3,6 +3,7 @@ package compatibility_test
 import (
 	"code.cloudfoundry.org/docker_driver_integration_tests"
 	"encoding/json"
+	"errors"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"github.com/onsi/gomega/gbytes"
@@ -47,7 +48,13 @@ var _ = BeforeSuite(func() {
 
 
 func LoadVolumeServiceBrokerBindingsFixture() []VolumeServiceBrokerBinding {
-	bytes, err := ioutil.ReadFile("bindings.json")
+	var ok bool
+	var bindingsFile string
+	if bindingsFile, ok = os.LookupEnv("BINDINGS_FILE"); !ok {
+		panic(errors.New("BINDINGS_FILE environment variable not set"))
+	}
+
+	bytes, err := ioutil.ReadFile(bindingsFile)
 	if err != nil {
 		panic(err.Error())
 	}

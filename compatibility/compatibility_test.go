@@ -15,6 +15,7 @@ import (
 	"os/exec"
 	"path"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -50,13 +51,19 @@ var _ = Describe("Compatibility", func() {
 		cf.CreateConfig.Name = binding.VolumeMounts[0].Device.VolumeID
 		cf.CreateConfig.Opts = map[string]interface{}{}
 		cf.CreateConfig.Opts["source"] = integrationFixtureTemplate.CreateConfig.Opts["source"]
-		cf.CreateConfig.Opts["username"] = integrationFixtureTemplate.CreateConfig.Opts["username"]
-		cf.CreateConfig.Opts["password"] = integrationFixtureTemplate.CreateConfig.Opts["password"]
+
+		if userAuthenticated(integrationFixtureTemplate.CreateConfig.Opts) {
+			cf.CreateConfig.Opts["username"] = integrationFixtureTemplate.CreateConfig.Opts["username"]
+			cf.CreateConfig.Opts["password"] = integrationFixtureTemplate.CreateConfig.Opts["password"]
+		} else {
+			cf.CreateConfig.Opts["uid"] = integrationFixtureTemplate.CreateConfig.Opts["uid"]
+			cf.CreateConfig.Opts["gid"] = integrationFixtureTemplate.CreateConfig.Opts["gid"]
+		}
 
 		for k, v := range binding.VolumeMounts[0].Device.MountConfig {
 			options = append(options, k)
 
-			if k == "source" || k == "username" || k == "password" {
+			if k == "source" || k == "username" || k == "password" || k == "uid" || k == "gid" {
 				continue
 			}
 
@@ -113,6 +120,15 @@ var _ = Describe("Compatibility", func() {
 	}
 })
 
+func userAuthenticated(opts map[string]interface{}) bool {
+	if _, ok := opts["username"]; ok {
+		return true
+	} else {
+		return false
+	}
+
+}
+
 func testFileWrite(logger lager.Logger, mountResponse dockerdriver.MountResponse) {
 	logger = logger.Session("test-file-write")
 	logger.Info("start")
@@ -163,7 +179,21 @@ func testReadOnly(logger lager.Logger, mountResponse dockerdriver.MountResponse)
 	testFile := path.Join(mountResponse.Mountpoint, fileName)
 	logger.Info("writing-test-file", lager.Data{"filepath": testFile})
 	err := ioutil.WriteFile(testFile, []byte("hello persi"), 0644)
-	Expect(err.Error()).To(ContainSubstring("read-only file system"))
+	if errorCheckReadOnlyMounts() {
+		Expect(err.Error()).To(ContainSubstring("read-only file system"))
+	}
+}
+
+func errorCheckReadOnlyMounts() bool {
+	if val, ok := os.LookupEnv("ERROR_CHECK_READONLY_MOUNTS"); ok {
+		errorCheckReadOnlyMounts, err := strconv.ParseBool(val)
+		if err != nil {
+			return false
+		}
+		return errorCheckReadOnlyMounts
+	} else {
+		return true;
+	}
 }
 
 var isSeeded = false
