@@ -92,6 +92,7 @@ var _ = Describe("LazyUnmount", func() {
 					Consistently(block, 2).ShouldNot(Receive())
 
 					go func() {
+						defer GinkgoRecover()
 						errResponse = driverClient.Unmount(testEnv, dockerdriver.UnmountRequest{
 							Name: certificationFixture.CreateConfig.Name,
 						})
