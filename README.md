@@ -85,7 +85,7 @@ fly -t persi execute \
 
 ## Running example NFS
 ```
-fly -t persi execute \
+TEST_PACKAGE=docker_driver_integration_tests/ fly -t persi execute \
 -c /Users/pivotal/workspace/nfs-volume-release/scripts/ci/run_docker_driver_integration_tests.build.yml \
 -j persi/nfsdriver-integration \
 -i nfs-volume-release-concourse-tasks=/Users/pivotal/workspace/nfs-volume-release \
@@ -98,7 +98,18 @@ fly -t persi execute \
 
 ## Running example NFS lazy unmount
 ```
-fly -t persi execute \
+TEST_PACKAGE=docker_driver_integration_tests/lazy_unmount fly -t persi execute \
+-c $HOME/workspace/nfsv3driver/scripts/ci/run_docker_driver_integration_tests.build.yml \
+-j nfs-driver/integration \
+-i docker_driver_integration_tests=$HOME/workspace/docker_driver_integration_tests \
+-i nfsv3driver=$HOME/workspace/nfsv3driver \
+-i mapfs=$HOME/workspace/mapfs \
+ --privileged
+```
+
+## Running example NFS compatibility
+```
+TEST_PACKAGE=docker_driver_integration_tests/compatibility fly -t persi execute \
 -c $HOME/workspace/nfsv3driver/scripts/ci/run_docker_driver_integration_tests.build.yml \
 -j nfs-driver/integration \
 -i docker_driver_integration_tests=$HOME/workspace/docker_driver_integration_tests \
