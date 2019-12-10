@@ -10,11 +10,8 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	. "github.com/onsi/gomega/gexec"
-	"io/ioutil"
-	"math/rand"
 	"os"
 	"os/exec"
-	"path"
 	"path/filepath"
 	"time"
 )
@@ -70,100 +67,40 @@ var _ = Describe("LazyUnmount", func() {
 				Expect(mountResponse.Err).To(Equal(""))
 				Expect(mountResponse.Mountpoint).NotTo(Equal(""))
 
-				cmd := exec.Command("bash","-c", "cat /proc/mounts | grep -E '"+mountResponse.Mountpoint+"'")
+				cmd := exec.Command("bash", "-c", "cat /proc/mounts | grep -E '"+mountResponse.Mountpoint+"'")
 				Expect(cmdRunner(cmd)).To(Equal(0))
 			})
 
-			Context("when the nfs server is slow", func() {
-				BeforeEach(func(){
-					addNetworkDelay()
+			Context("when the nfs server has a file handle kept open during umount", func() {
+				var file *os.File
+
+				BeforeEach(func() {
+					testFilePath := filepath.Join(mountResponse.Mountpoint, "file-used-to-keep-open")
+
+					file, err = os.OpenFile(testFilePath, os.O_CREATE, os.FileMode(0777))
+					Expect(err).NotTo(HaveOccurred())
 				})
 
 				AfterEach(func() {
-					removeNetworkDelay()
+					_ = file.Close()
 				})
 
 				It("should unmount lazily", func() {
-					block := make(chan bool)
-					go func() {
-						testFileWrite(testLogger, mountResponse)
-						block <- true
-					}()
-					Consistently(block, 2).ShouldNot(Receive())
-
-					go func() {
-						defer GinkgoRecover()
-						errResponse := driverClient.Unmount(testEnv, dockerdriver.UnmountRequest{
-							Name: certificationFixture.CreateConfig.Name,
-						})
-						Expect(errResponse.Err).To(Equal(""))
-					}()
+					errResponse := driverClient.Unmount(testEnv, dockerdriver.UnmountRequest{
+						Name: certificationFixture.CreateConfig.Name,
+					})
+					Expect(errResponse.Err).To(Equal(""))
 
 					Eventually(func() int {
-						cmd := exec.Command("bash","-c", "cat /proc/mounts | grep -E '"+mountResponse.Mountpoint+"'")
+						cmd := exec.Command("bash", "-c", "cat /proc/mounts | grep -E '"+mountResponse.Mountpoint+"'")
 						return cmdRunner(cmd)
 
-					}, 5, 500 * time.Millisecond).Should(Equal(1))
+					}, 5, 500*time.Millisecond).Should(Equal(1))
 				})
 			})
 		})
 	})
 })
-
-func testFileWrite(logger lager.Logger, mountResponse dockerdriver.MountResponse) {
-	logger = logger.Session("test-file-write")
-	logger.Info("start")
-	defer logger.Info("end")
-
-	fileName := "certtest-" + randomString(10)
-
-	logger.Info("writing-test-file", lager.Data{"mountpoint": mountResponse.Mountpoint})
-	testFile := path.Join(mountResponse.Mountpoint, fileName)
-	logger.Info("writing-test-file", lager.Data{"filepath": testFile})
-	err := ioutil.WriteFile(testFile, []byte("hello persi"), 0644)
-	Expect(err).NotTo(HaveOccurred())
-
-	matches, err := filepath.Glob(mountResponse.Mountpoint + "/" + fileName)
-	Expect(err).NotTo(HaveOccurred())
-	Expect(len(matches)).To(Equal(1))
-
-	bytes, err := ioutil.ReadFile(mountResponse.Mountpoint + "/" + fileName)
-	Expect(err).NotTo(HaveOccurred())
-	Expect(bytes).To(Equal([]byte("hello persi")))
-
-	err = os.Remove(testFile)
-	Expect(err).NotTo(HaveOccurred())
-
-	matches, err = filepath.Glob(path.Join(mountResponse.Mountpoint, fileName))
-	Expect(err).NotTo(HaveOccurred())
-	Expect(len(matches)).To(Equal(0))
-}
-
-var isSeeded = false
-
-func randomString(n int) string {
-	if !isSeeded {
-		rand.Seed(time.Now().UnixNano())
-		isSeeded = true
-	}
-	runes := []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
-
-	b := make([]rune, n)
-	for i := range b {
-		b[i] = runes[rand.Intn(len(runes))]
-	}
-	return string(b)
-}
-
-func addNetworkDelay() {
-	cmd := exec.Command("tc", "qdisc","add","dev","lo","root","netem","delay","2000ms")
-	Expect(cmdRunner(cmd)).To(Equal(0))
-}
-
-func removeNetworkDelay() {
-	cmd := exec.Command("tc","qdisc","del","dev","lo","root","netem")
-	Expect(cmdRunner(cmd)).To(Equal(0))
-}
 
 func cmdRunner(cmd *exec.Cmd) int {
 	session, err := Start(cmd, GinkgoWriter, GinkgoWriter)
