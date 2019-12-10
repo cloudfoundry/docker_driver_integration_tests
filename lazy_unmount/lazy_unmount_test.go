@@ -86,7 +86,6 @@ var _ = Describe("LazyUnmount", func() {
 				It("should unmount lazily", func() {
 					block := make(chan bool)
 					go func() {
-						defer GinkgoRecover()
 						testFileWrite(testLogger, mountResponse)
 						block <- true
 					}()
