@@ -93,7 +93,7 @@ var _ = Describe("LazyUnmount", func() {
 
 					go func() {
 						defer GinkgoRecover()
-						errResponse = driverClient.Unmount(testEnv, dockerdriver.UnmountRequest{
+						errResponse := driverClient.Unmount(testEnv, dockerdriver.UnmountRequest{
 							Name: certificationFixture.CreateConfig.Name,
 						})
 						Expect(errResponse.Err).To(Equal(""))
