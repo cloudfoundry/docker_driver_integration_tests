@@ -7,5 +7,6 @@
     {"volume_mounts":[{"device":{"volume_id":"6","mount_config":{"password":"b","source":"foo/bar","username":"a","version": "1.0"}}}]},
     {"volume_mounts":[{"device":{"volume_id":"7","mount_config":{"password":"b","source":"foo/bar","username":"a","version": "2.0"}}}]},
     {"volume_mounts":[{"device":{"volume_id":"8","mount_config":{"password":"b","source":"foo/bar","username":"a","version": "2.1"}}}]},
-    {"volume_mounts":[{"device":{"volume_id":"9","mount_config":{"password":"b","source":"foo/bar","username":"a","version": "3.0"}}}]}
+    {"volume_mounts":[{"device":{"volume_id":"9","mount_config":{"password":"b","source":"foo/bar","username":"a","version": "3.0"}}}]},
+    {"volume_mounts":[{"device":{"volume_id":"10","mount_config":{"password":"b","source":"foo/bar","username":"a","mfsymlinks": "true"}}}]}
 ]
