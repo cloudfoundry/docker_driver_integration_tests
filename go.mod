@@ -1,5 +1,7 @@
 module code.cloudfoundry.org/docker_driver_integration_tests
 
+go 1.14
+
 require (
 	code.cloudfoundry.org/cfhttp v2.0.0+incompatible // indirect
 	code.cloudfoundry.org/clock v0.0.0-20180518195852-02e53af36e6c // indirect
