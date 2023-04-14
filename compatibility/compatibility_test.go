@@ -1,14 +1,7 @@
 package compatibility_test
 
 import (
-	"code.cloudfoundry.org/dockerdriver"
-	"code.cloudfoundry.org/dockerdriver/driverhttp"
-	"code.cloudfoundry.org/lager"
-	"code.cloudfoundry.org/lager/lagertest"
 	"context"
-	. "github.com/onsi/ginkgo"
-	. "github.com/onsi/gomega"
-	. "github.com/onsi/gomega/gexec"
 	"io/ioutil"
 	"math/rand"
 	"os"
@@ -18,17 +11,25 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"code.cloudfoundry.org/dockerdriver"
+	"code.cloudfoundry.org/dockerdriver/driverhttp"
+	"code.cloudfoundry.org/lager/v3"
+	"code.cloudfoundry.org/lager/v3/lagertest"
+	. "github.com/onsi/ginkgo/v2"
+	. "github.com/onsi/gomega"
+	. "github.com/onsi/gomega/gexec"
 )
 
 var _ = Describe("Compatibility", func() {
 	var (
 		err error
 
-		testLogger           lager.Logger
-		testContext          context.Context
-		testEnv              dockerdriver.Env
-		driverClient         dockerdriver.Driver
-		errResponse          dockerdriver.ErrorResponse
+		testLogger   lager.Logger
+		testContext  context.Context
+		testEnv      dockerdriver.Env
+		driverClient dockerdriver.Driver
+		errResponse  dockerdriver.ErrorResponse
 
 		mountResponse dockerdriver.MountResponse
 	)
@@ -87,7 +88,7 @@ var _ = Describe("Compatibility", func() {
 				Expect(errResponse.Err).To(Equal(""))
 			})
 
-			Context("given a mounted volume with options: " + strings.Join(options, ","), func() {
+			Context("given a mounted volume with options: "+strings.Join(options, ","), func() {
 				BeforeEach(func() {
 					mountResponse = driverClient.Mount(testEnv, dockerdriver.MountRequest{
 						Name: certificationFixture.CreateConfig.Name,
@@ -192,7 +193,7 @@ func errorCheckReadOnlyMounts() bool {
 		}
 		return errorCheckReadOnlyMounts
 	} else {
-		return true;
+		return true
 	}
 }
 

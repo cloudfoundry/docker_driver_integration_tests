@@ -5,10 +5,9 @@ import (
 	"io/ioutil"
 	"os"
 
-	"code.cloudfoundry.org/dockerdriver"
 	"code.cloudfoundry.org/docker_driver_integration_tests"
-
-	. "github.com/onsi/ginkgo"
+	"code.cloudfoundry.org/dockerdriver"
+	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 )
 

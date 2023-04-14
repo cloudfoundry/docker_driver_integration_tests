@@ -4,14 +4,10 @@ These tests are used to test volume drivers against the Diego volume manager (ak
 
 Prereqs:
 - [go](https://golang.org/dl/)
-- ginkgo and gomega; i.e.
+
+# Running locally
 ```
-go get github.com/onsi/ginkgo/ginkgo
-go get github.com/onsi/gomega
-```
-To install integration tests in your `GOPATH`:
-```
-go get -t code.cloudfoundry.org/docker_driver_integration_tests
+go run github.com/onsi/ginkgo/v2/ginkgo -r
 ```
 
 # Configuration

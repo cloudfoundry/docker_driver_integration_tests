@@ -4,5 +4,3 @@ updates:
     directory: "/"
     schedule:
       interval: "daily"
-
-# Do we want to migrate /vendor to go-modules ?

@@ -1,24 +1,25 @@
 package compatibility_test
 
 import (
-	"code.cloudfoundry.org/docker_driver_integration_tests"
 	"encoding/json"
 	"errors"
-	. "github.com/onsi/ginkgo"
-	. "github.com/onsi/gomega"
-	"github.com/onsi/gomega/gbytes"
-	"github.com/onsi/gomega/gexec"
 	"io/ioutil"
 	"os"
 	"os/exec"
 	"strings"
 	"testing"
+
+	"code.cloudfoundry.org/docker_driver_integration_tests"
+	. "github.com/onsi/ginkgo/v2"
+	. "github.com/onsi/gomega"
+	"github.com/onsi/gomega/gbytes"
+	"github.com/onsi/gomega/gexec"
 )
 
 type VolumeServiceBrokerBinding struct {
 	VolumeMounts []struct {
-		Device       struct {
-			VolumeID    string `json:"volume_id"`
+		Device struct {
+			VolumeID    string                 `json:"volume_id"`
 			MountConfig map[string]interface{} `json:"mount_config"`
 		} `json:"device"`
 	} `json:"volume_mounts"`
@@ -27,7 +28,7 @@ type VolumeServiceBrokerBinding struct {
 var (
 	integrationFixtureTemplate = docker_driver_integration_tests.LoadFixtureTemplate()
 	bindingsFixture            = LoadVolumeServiceBrokerBindingsFixture()
-	session *gexec.Session
+	session                    *gexec.Session
 )
 
 func TestCompatibility(t *testing.T) {
@@ -45,7 +46,6 @@ var _ = BeforeSuite(func() {
 
 	Eventually(session.Out).Should(gbytes.Say("driver-server.started"))
 })
-
 
 func LoadVolumeServiceBrokerBindingsFixture() []VolumeServiceBrokerBinding {
 	var ok bool
