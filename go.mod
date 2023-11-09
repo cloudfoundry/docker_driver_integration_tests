@@ -6,7 +6,7 @@ require (
 	code.cloudfoundry.org/dockerdriver v0.0.0-20190430182539-d20038a36dd2
 	code.cloudfoundry.org/lager v2.0.0+incompatible
 	github.com/onsi/ginkgo v1.16.5
-	github.com/onsi/gomega v1.28.1
+	github.com/onsi/gomega v1.30.0
 	github.com/tedsuo/ifrit v0.0.0-20191009134036-9a97d0632f00
 )
 
