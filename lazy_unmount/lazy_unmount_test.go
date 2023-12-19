@@ -1,19 +1,20 @@
 package lazy_unmount_test
 
 import (
-	"code.cloudfoundry.org/docker_driver_integration_tests"
-	"code.cloudfoundry.org/dockerdriver"
-	"code.cloudfoundry.org/dockerdriver/driverhttp"
-	"code.cloudfoundry.org/lager"
-	"code.cloudfoundry.org/lager/lagertest"
 	"context"
-	. "github.com/onsi/ginkgo"
-	. "github.com/onsi/gomega"
-	. "github.com/onsi/gomega/gexec"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"time"
+
+	"code.cloudfoundry.org/docker_driver_integration_tests"
+	"code.cloudfoundry.org/dockerdriver"
+	"code.cloudfoundry.org/dockerdriver/driverhttp"
+	"code.cloudfoundry.org/lager/v3"
+	"code.cloudfoundry.org/lager/v3/lagertest"
+	. "github.com/onsi/ginkgo/v2"
+	. "github.com/onsi/gomega"
+	. "github.com/onsi/gomega/gexec"
 )
 
 var _ = Describe("LazyUnmount", func() {

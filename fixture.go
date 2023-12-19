@@ -11,7 +11,7 @@ import (
 
 	"code.cloudfoundry.org/dockerdriver"
 	"github.com/tedsuo/ifrit"
-	"github.com/tedsuo/ifrit/ginkgomon"
+	ginkgomon "github.com/tedsuo/ifrit/ginkgomon_v2"
 )
 
 type CertificationFixture struct {
